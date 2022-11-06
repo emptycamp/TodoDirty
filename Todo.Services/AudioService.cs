@@ -45,7 +45,7 @@ namespace Todo.Services
                 var createdAudioDto = _mapper.Map<AudioResponse>(createdAudio);
                 return createdAudioDto;
             }
-            catch (RepositoryDoesntExistException exception)
+            catch (RepositoryDoesNotExistException exception)
             {
                 throw new ServiceException(nameof(entityDto.NoteId), exception.Message);
             }

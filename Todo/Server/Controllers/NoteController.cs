@@ -1,7 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
-using Microsoft.AspNetCore.Mvc;
-using Todo.Infrastructure.Exceptions;
-using Todo.Services;
+﻿using Microsoft.AspNetCore.Mvc;
 using Todo.Services.Exceptions;
 using Todo.Services.Interfaces;
 using Todo.Shared.Requests;

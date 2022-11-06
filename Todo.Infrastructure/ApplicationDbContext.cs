@@ -2,7 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Todo.Core.Models;
 
-namespace Todo.Core
+namespace Todo.Infrastructure
 {
     public class ApplicationDbContext : IdentityDbContext<User, Role, Guid>
     {

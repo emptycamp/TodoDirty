@@ -1,5 +1,4 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Todo.Services;
 using Todo.Services.Exceptions;
 using Todo.Services.Interfaces;
 using Todo.Shared.Requests;

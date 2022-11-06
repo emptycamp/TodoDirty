@@ -1,5 +1,4 @@
-﻿using Todo.Core;
-using Todo.Core.Interfaces;
+﻿using Todo.Core.Interfaces;
 using Todo.Core.Models;
 
 namespace Todo.Infrastructure

@@ -1,7 +1,6 @@
 ﻿using AutoMapper;
 using Todo.Core.Interfaces;
 using Todo.Core.Models;
-using Todo.Infrastructure;
 using Todo.Infrastructure.Exceptions;
 using Todo.Services.Exceptions;
 using Todo.Services.Interfaces;
@@ -46,7 +45,7 @@ public class NoteService : INoteService
             var createdNoteDto = _mapper.Map<NoteResponse>(createdNote);
             return createdNoteDto;
         }
-        catch (RepositoryDoesntExistException exception)
+        catch (RepositoryDoesNotExistException exception)
         {
             throw new ServiceException(nameof(entityDto.DocumentId), exception.Message);
         }

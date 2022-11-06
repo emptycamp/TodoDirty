@@ -1,5 +1,4 @@
 using Microsoft.EntityFrameworkCore;
-using Todo.Core;
 using Todo.Core.Interfaces;
 using Todo.Core.Models;
 using Todo.Infrastructure;

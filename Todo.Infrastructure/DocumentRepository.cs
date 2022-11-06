@@ -1,5 +1,4 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Todo.Core;
 using Todo.Core.Interfaces;
 using Todo.Core.Models;
 using Todo.Infrastructure.Exceptions;
@@ -18,18 +17,18 @@ namespace Todo.Infrastructure
 
             if (document == null)
             {
-                throw new RepositoryDoesntExistException("Document doesn't exist");
+                throw new RepositoryDoesNotExistException("Document doesn't exist");
             }
 
             document.Notes.Add(note);
-            await _context.SaveChangesAsync();
+            await Context.SaveChangesAsync();
 
             return note;
         }
 
         public override async Task<ICollection<Document>> GetAll(int limit = 1000)
         {
-            return await _table.Take(limit).Include(x => x.Notes).ToListAsync();
+            return await Table.Take(limit).Include(x => x.Notes).ToListAsync();
         }
     }
 }

@@ -1,6 +1,4 @@
-﻿using Todo.Core.Models;
-
-namespace Todo.Shared.Responses
+﻿namespace Todo.Shared.Responses
 {
     public class AudioResponse
     {
