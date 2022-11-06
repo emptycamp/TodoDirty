@@ -1,37 +1,19 @@
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Todo.Infrastructure;
 using Todo.Server.Extensions;
 using Todo.Server.Middlewares;
-using Todo.Server.Validations;
 using Todo.Services.Mappers;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-
-builder.Services.AddControllersWithViews(options =>
-{
-    options.Filters.Add<ErrorActionFilterAttribute>();
-});
-
-builder.Services.AddRazorPages();
-builder.Services.AddAutoMapper(typeof(DocumentMapper));
-
-builder.Services.Configure<ApiBehaviorOptions>(options =>
-{
-    options.SuppressModelStateInvalidFilter = true;
-});
-
-builder.Services.AddDbContext<ApplicationDbContext>(options =>
-{
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
-});
+builder
+    .SetupSqlServer()
+    .SetupAuthentication()
+    .SetupInjections()
+    .SetupActionFilters()
+    .SetupSwagger();
 
 builder.Services
-    .SetupIdentity()
-    .SetupSwagger()
-    .SetupInjections();
+    .AddAutoMapper(typeof(DocumentMapper))
+    .AddRazorPages();
 
 var app = builder.Build();
 
@@ -58,7 +40,6 @@ app.UseStaticFiles();
 app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
-
 
 app.MapRazorPages();
 app.MapControllers();

@@ -9,6 +9,7 @@ namespace Todo.Services.Mappers
     {
         public DocumentMapper()
         {
+            // TODO: extract to seperate mappers
             CreateMap<CreateDocumentRequest, Document>();
             CreateMap<CreateNoteRequest, Note>();
             CreateMap<CreateAudioRequest, Audio>();
@@ -16,6 +17,8 @@ namespace Todo.Services.Mappers
             CreateMap<Document, DocumentResponse>();
             CreateMap<Note, NoteResponse>();
             CreateMap<Audio, AudioResponse>();
+
+            CreateMap<CreateUserRequest, User>();
         }
     }
 }
