@@ -1,45 +1,37 @@
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Todo.Core.Interfaces;
-using Todo.Core.Models;
 using Todo.Infrastructure;
-using Todo.Services;
-using Todo.Services.Interfaces;
+using Todo.Server.Extensions;
+using Todo.Server.Middlewares;
+using Todo.Server.Validations;
 using Todo.Services.Mappers;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
-builder.Services.AddControllersWithViews();
+builder.Services.AddControllersWithViews(options =>
+{
+    options.Filters.Add<ErrorActionFilterAttribute>();
+});
+
 builder.Services.AddRazorPages();
 builder.Services.AddAutoMapper(typeof(DocumentMapper));
+
+builder.Services.Configure<ApiBehaviorOptions>(options =>
+{
+    options.SuppressModelStateInvalidFilter = true;
+});
 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
 {
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
 });
 
-builder.Services.AddIdentity<User, Role>(options =>
-{
-    options.Password.RequireDigit = false;
-    options.Password.RequireLowercase = false;
-    options.Password.RequireNonAlphanumeric = false;
-    options.Password.RequireUppercase = false;
-    options.Password.RequiredLength = 3;
-    options.Password.RequiredUniqueChars = 0;
-}).AddEntityFrameworkStores<ApplicationDbContext>();
-
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
-
-builder.Services.AddScoped<IDocumentRepository, DocumentRepository>();
-builder.Services.AddScoped<IDocumentService, DocumentService>();
-
-builder.Services.AddScoped<INoteRepository, NoteRepository>();
-builder.Services.AddScoped<INoteService, NoteService>();
-
-builder.Services.AddScoped<IAudioRepository, AudioRepository>();
-builder.Services.AddScoped<IAudioService, AudioService>();
+builder.Services
+    .SetupIdentity()
+    .SetupSwagger()
+    .SetupInjections();
 
 var app = builder.Build();
 
@@ -57,6 +49,7 @@ else
     app.UseHsts();
 }
 
+app.UseMiddleware<ExceptionMiddleware>();
 app.UseHttpsRedirection();
 
 app.UseBlazorFrameworkFiles();

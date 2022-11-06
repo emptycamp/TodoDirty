@@ -6,7 +6,7 @@ public interface ICrudService<in TRequest, TResponse> : ICrudService<TRequest, T
 
 public interface ICrudService<in TRequest, TResponse, in TKey>
 {
-    Task<ICollection<TResponse>> GetAllEntities();
+    Task<ICollection<TResponse>> GetAllEntities(int limit, int offset);
     Task<TResponse?> GetEntity(TKey id);
     Task<TResponse> CreateEntity(TRequest entityDto);
     Task<TResponse> UpdateEntity(TKey id, TRequest entityDto);

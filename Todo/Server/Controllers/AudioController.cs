@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Todo.Services.Exceptions;
 using Todo.Services.Interfaces;
+using Todo.Shared.Queries;
 using Todo.Shared.Requests;
 using Todo.Shared.Responses;
 
@@ -20,9 +20,9 @@ public class AudioController : ControllerBase
 
     [HttpGet]
     [ProducesResponseType(typeof(ICollection<AudioResponse>), StatusCodes.Status200OK)]
-    public async Task<IActionResult> GetAudios()
+    public async Task<IActionResult> GetAudios([FromQuery] LimitQuery limitQuery)
     {
-        return Ok(await _audioService.GetAllEntities());
+        return Ok(await _audioService.GetAllEntities(limitQuery.Limit, limitQuery.Offset));
     }
 
     [HttpGet("{id}")]
@@ -37,17 +37,8 @@ public class AudioController : ControllerBase
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> CreateAudio(CreateAudioRequest audio)
     {
-        try
-        {
-            var createdDocument = await _audioService.CreateEntity(audio);
-            return CreatedAtAction("GetAudio", new { id = createdDocument.Id }, createdDocument);
-        }
-        catch (ServiceException e)
-        {
-            ModelState.AddModelError(e.ParamName, e.Message);
-        }
-
-        return ValidationProblem(ModelState);
+        var createdDocument = await _audioService.CreateEntity(audio);
+        return CreatedAtAction("GetAudio", new { id = createdDocument.Id }, createdDocument);
     }
 
     [HttpPut("{id}")]

@@ -1,8 +1,6 @@
 ﻿using AutoMapper;
 using Todo.Core.Interfaces;
 using Todo.Core.Models;
-using Todo.Infrastructure.Exceptions;
-using Todo.Services.Exceptions;
 using Todo.Services.Interfaces;
 using Todo.Shared.Requests;
 using Todo.Shared.Responses;
@@ -22,33 +20,26 @@ namespace Todo.Services
             _mapper = mapper;
         }
 
-        public async Task<ICollection<AudioResponse>> GetAllEntities()
+        public async Task<ICollection<AudioResponse>> GetAllEntities(int limit, int offset)
         {
-            var audios = await _audioRepository.GetAll();
+            var audios = await _audioRepository.GetAll(limit, offset);
             var audiosDto = _mapper.Map<ICollection<AudioResponse>>(audios);
             return audiosDto;
         }
 
         public async Task<AudioResponse?> GetEntity(int id)
         {
-            var audio = await _audioRepository.FindById(id);
+            var audio = await _audioRepository.FindByIdOrThrow(id);
             var audioDto = _mapper.Map<AudioResponse>(audio);
             return audioDto;
         }
 
         public async Task<AudioResponse> CreateEntity(CreateAudioRequest entityDto)
         {
-            try
-            {
-                var audio = _mapper.Map<Audio>(entityDto);
-                var createdAudio = await _noteRepository.AddAudio(entityDto.NoteId, audio);
-                var createdAudioDto = _mapper.Map<AudioResponse>(createdAudio);
-                return createdAudioDto;
-            }
-            catch (RepositoryDoesNotExistException exception)
-            {
-                throw new ServiceException(nameof(entityDto.NoteId), exception.Message);
-            }
+            var audio = _mapper.Map<Audio>(entityDto);
+            var createdAudio = await _noteRepository.AddAudio(entityDto.NoteId, audio);
+            var createdAudioDto = _mapper.Map<AudioResponse>(createdAudio);
+            return createdAudioDto;
         }
 
         public async Task<AudioResponse> UpdateEntity(int id, CreateAudioRequest entityDto)

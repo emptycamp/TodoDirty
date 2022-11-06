@@ -1,10 +1,7 @@
-﻿using System.ComponentModel.DataAnnotations;
-
-namespace Todo.Core.Models
+﻿namespace Todo.Core.Models
 {
-    public class Audio
+    public class Audio: EntityBase
     {
-        public int Id { get; set; }
-        [Required] public string Path { get; set; } = null!;
+        public string Path { get; set; } = null!;
     }
 }

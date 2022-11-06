@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Todo.Services.Exceptions;
 using Todo.Services.Interfaces;
+using Todo.Shared.Queries;
 using Todo.Shared.Requests;
 using Todo.Shared.Responses;
 
@@ -19,9 +19,9 @@ public class NoteController : ControllerBase
 
     [HttpGet]
     [ProducesResponseType(typeof(ICollection<NoteResponse>), StatusCodes.Status200OK)]
-    public async Task<IActionResult> GetNotes()
+    public async Task<IActionResult> GetNotes([FromQuery] LimitQuery limitQuery)
     {
-        return Ok(await _noteService.GetAllEntities());
+        return Ok(await _noteService.GetAllEntities(limitQuery.Limit, limitQuery.Offset));
     }
 
     [HttpGet("{id}")]
@@ -36,17 +36,8 @@ public class NoteController : ControllerBase
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> CreateNote(CreateNoteRequest note)
     {
-        try
-        {
-            var createdDocument = await _noteService.CreateEntity(note);
-            return CreatedAtAction("GetNote", new { id = createdDocument.Id }, createdDocument);
-        }
-        catch (ServiceException e)
-        {
-            ModelState.AddModelError(e.ParamName, e.Message);
-        }
-
-        return ValidationProblem(ModelState);
+        var createdDocument = await _noteService.CreateEntity(note);
+        return CreatedAtAction("GetNote", new { id = createdDocument.Id }, createdDocument);
     }
 
     [HttpPut("{id}")]

@@ -19,16 +19,36 @@ public class DocumentService : IDocumentService
         _mapper = mapper;
     }
 
-    public async Task<ICollection<DocumentResponse>> GetAllEntities()
+    public async Task<ICollection<DocumentResponse>> GetAllEntities(int limit, int offset)
     {
-        var documents = await _documentRepository.GetAll();
+        var documents = await _documentRepository.GetAll(limit, offset);
         var documentsDto = _mapper.Map<ICollection<DocumentResponse>>(documents);
         return documentsDto;
     }
 
     public async Task<DocumentResponse?> GetEntity(int id)
     {
-        var document = await _documentRepository.FindById(id);
+        var document = await _documentRepository.FindByIdOrThrow(id);
+        var documentDto = _mapper.Map<DocumentResponse>(document);
+        return documentDto;
+    }
+
+    public async Task<DocumentResponse> GetDocumentWithNotes(int documentId, int limit, int offset)
+    {
+        var document = await _documentRepository.GetDocumentWithNotesOrThrow(documentId, limit, offset);
+        var documentDto = _mapper.Map<DocumentResponse>(document);
+        return documentDto;
+    }
+    public async Task<DocumentResponse> GetDocumentWithNoteWithAudios(int documentId, int noteId, int limit, int offset)
+    {
+        var document = await _documentRepository.GetDocumentWithNoteWithAudiosOrThrow(documentId, noteId, limit, offset);
+        var documentDto = _mapper.Map<DocumentResponse>(document);
+        return documentDto;
+    }
+
+    public async Task<DocumentResponse> GetDocumentWithNoteWithAudio(int documentId, int noteId, int audioId)
+    {
+        var document = await _documentRepository.GetDocumentWithNoteWithAudioOrThrow(documentId, noteId, audioId);
         var documentDto = _mapper.Map<DocumentResponse>(document);
         return documentDto;
     }
