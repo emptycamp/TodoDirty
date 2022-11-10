@@ -1,6 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
-
-namespace Todo.Shared.Responses
+﻿namespace Todo.Shared.Responses
 {
     public class DocumentResponse
     {

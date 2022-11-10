@@ -33,6 +33,7 @@ public class DocumentController : ControllerBase
     /// <summary>
     /// Gets document by ID with all of its notes
     /// </summary>
+    /// <param name="limitQuery">Pagination in query</param>
     /// <param name="id">Document ID</param>
     /// <response code="200">Successfully retrieved document</response>
     /// <response code="404">Document not found</response>
@@ -47,6 +48,7 @@ public class DocumentController : ControllerBase
     /// <summary>
     /// Gets document by ID with selected note and all of its audios
     /// </summary>
+    /// <param name="limitQuery">Pagination in query</param>
     /// <param name="documentId">Document ID</param>
     /// <param name="noteId">note ID</param>
     /// <response code="200">Successfully retrieved document</response>

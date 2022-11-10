@@ -1,12 +1,10 @@
-﻿using System.Security.Authentication;
-using AutoMapper;
+﻿using AutoMapper;
 using Microsoft.AspNetCore.Identity;
 using Todo.Core.Models;
 using Todo.Services.Exceptions;
 using Todo.Services.Interfaces;
 using Todo.Shared.Requests;
 using Todo.Shared.Responses;
-using AuthenticationException = Todo.Services.Exceptions.AuthenticationException;
 
 namespace Todo.Services
 {
