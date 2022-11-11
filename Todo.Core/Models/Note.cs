@@ -2,9 +2,9 @@
 {
     public class Note: EntityBase
     {
-        public string Title { get; set; } = null!;
+        public required string Title { get; set; }
         public string? Text { get; set; }
 
-        public List<Audio> Audios { get; set; } = new();
+        public required List<Audio> Audios { get; set; }
     }
 }

@@ -1,27 +1,25 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Authorization;
-using Todo.Server.Validations;
+using Todo.Server.Filters;
 
 namespace Todo.Server.Extensions
 {
     public static class BuilderActionFilterExtensions
     {
-        public static WebApplicationBuilder SetupActionFilters(this WebApplicationBuilder builder)
+        public static IServiceCollection SetupActionFilters(this IServiceCollection services)
         {
-            builder.Services.AddControllersWithViews(options =>
+            services.AddControllersWithViews(options =>
             {
                 options.Filters.Add(new AuthorizeFilter());
-
-
                 options.Filters.Add<ErrorActionFilterAttribute>();
             });
 
-            builder.Services.Configure<ApiBehaviorOptions>(options =>
+            services.Configure<ApiBehaviorOptions>(options =>
             {
                 options.SuppressModelStateInvalidFilter = true;
             });
 
-            return builder;
+            return services;
         }
     }
 }

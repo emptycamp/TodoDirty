@@ -4,24 +4,30 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
 using Todo.Core.Models;
 using Todo.Infrastructure;
+using Todo.Server.Store;
 
 namespace Todo.Server.Extensions
 {
-    public static class BuilderAuthenticationExtensions
+    public static class AuthenticationServiceExtensions
     {
-        public static WebApplicationBuilder SetupAuthentication(this WebApplicationBuilder builder)
+        public static IServiceCollection SetupAuthentication(this IServiceCollection services, IConfiguration configuration)
         {
-            AddIdentity(builder);
-            AddAuthentication(builder);
+            AddIdentity(services);
+            AddAuthentication(services, configuration);
 
-            return builder;
+            return services;
         }
 
-        private static void AddAuthentication(WebApplicationBuilder builder)
+        private static void AddAuthentication(IServiceCollection services, IConfiguration configuration)
         {
-            var jwtConfig = builder.Configuration.GetSection("JwtConfig");
+            var jwtConfig = configuration.GetSection("JwtConfig").Get<JwtConfig>();
 
-            builder.Services.AddAuthentication(options =>
+            if (jwtConfig is null)
+            {
+                throw new NullReferenceException("JwtConfig settings are missing in appsettings.json");
+            }
+
+            services.AddAuthentication(options =>
                 {
                     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
                     options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -35,16 +41,16 @@ namespace Todo.Server.Extensions
                         ValidateAudience = false,
                         ValidateLifetime = false,
                         ValidateIssuerSigningKey = false,
-                        ValidIssuer = jwtConfig["ValidIssuer"],
-                        ValidAudience = jwtConfig["ValidAudience"],
-                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtConfig["Secret"]))
+                        ValidIssuer = jwtConfig.ValidIssuer,
+                        ValidAudience = jwtConfig.ValidAudience,
+                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtConfig.Secret))
                     };
                 });
         }
 
-        private static void AddIdentity(WebApplicationBuilder builder)
+        private static void AddIdentity(IServiceCollection services)
         {
-            builder.Services.AddIdentity<User, Role>(options =>
+            services.AddIdentity<User, Role>(options =>
                 {
                     options.Password.RequireDigit = false;
                     options.Password.RequireLowercase = false;
@@ -52,6 +58,7 @@ namespace Todo.Server.Extensions
                     options.Password.RequireUppercase = false;
                     options.Password.RequiredLength = 3;
                     options.Password.RequiredUniqueChars = 0;
+                    options.User.RequireUniqueEmail = true;
                 })
                 .AddEntityFrameworkStores<ApplicationDbContext>()
                 .AddDefaultTokenProviders();

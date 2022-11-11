@@ -2,8 +2,8 @@
 {
     public class Document: EntityBase
     {
-        public string Title { get; set; } = null!;
+        public required string Title { get; set; }
 
-        public List<Note> Notes { get; set; } = new();
+        public required List<Note> Notes { get; set; } 
     }
 }

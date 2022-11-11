@@ -2,6 +2,6 @@
 {
     public class Audio: EntityBase
     {
-        public string Path { get; set; } = null!;
+        public required string Path { get; set; }
     }
 }

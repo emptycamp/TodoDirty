@@ -8,8 +8,7 @@ namespace Todo.Shared.Requests
         /// Document's title
         /// </summary>
         /// <example>My new document!</example>
-        [Required]
         [StringLength(40, MinimumLength = 5)]
-        public string Title { get; set; } = null!;
+        public required string Title { get; set; }
     }
 }

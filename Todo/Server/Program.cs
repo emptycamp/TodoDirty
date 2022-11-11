@@ -4,14 +4,12 @@ using Todo.Services.Mappers;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder
-    .SetupSqlServer()
-    .SetupAuthentication()
-    .SetupInjections()
-    .SetupActionFilters()
-    .SetupSwagger();
-
 builder.Services
+    .SetupSqlServer(builder.Configuration)
+    .SetupAuthentication(builder.Configuration)
+    .SetupInjections(builder.Configuration)
+    .SetupActionFilters()
+    .SetupSwagger()
     .AddAutoMapper(typeof(DocumentMapper))
     .AddRazorPages();
 

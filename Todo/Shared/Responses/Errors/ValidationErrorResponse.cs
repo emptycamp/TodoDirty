@@ -2,7 +2,9 @@
 {
     public class ValidationErrorResponse : ErrorResponse
     {
-        public ValidationErrorResponse(IEnumerable<FieldError> errors) : 
-            base("Validation failed", errors) { }
+        public ValidationErrorResponse(IEnumerable<FieldError> errors) :
+            base("Validation failed", errors)
+        {
+        }
     }
 }

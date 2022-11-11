@@ -1,13 +1,9 @@
-﻿using System.ComponentModel.DataAnnotations;
-
-namespace Todo.Shared.Requests
+﻿namespace Todo.Shared.Requests
 {
     public record CreateNoteRequest
     {
-        [Required]
-        public int DocumentId { get; set; }
-        [Required]
-        public string Title { get; set; } = null!;
+        public required int DocumentId { get; set; }
+        public required string Title { get; set; }
         public string? Text { get; set; }
     }
 }

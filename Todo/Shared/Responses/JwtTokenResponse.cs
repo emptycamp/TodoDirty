@@ -1,7 +1,7 @@
 ﻿namespace Todo.Shared.Responses
 {
-    public class JwtTokenResponse
+    public record JwtTokenResponse
     {
-        public string Token { get; set; }
+        public required string Token { get; set; }
     }
 }

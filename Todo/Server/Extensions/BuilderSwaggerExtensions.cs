@@ -7,11 +7,11 @@ namespace Todo.Server.Extensions
 {
     public static class BuilderSwaggerExtensions
     {
-        public static WebApplicationBuilder SetupSwagger(this WebApplicationBuilder builder)
+        public static IServiceCollection SetupSwagger(this IServiceCollection services)
         {
-            builder.Services.AddEndpointsApiExplorer();
+            services.AddEndpointsApiExplorer();
 
-            builder.Services.AddSwaggerGen(options =>
+            services.AddSwaggerGen(options =>
             {
                 options.SwaggerDoc("v1", new OpenApiInfo
                 {
@@ -23,7 +23,7 @@ namespace Todo.Server.Extensions
                 AddXmlDocuments(options);
             });
 
-            return builder;
+            return services;
         }
 
         private static void AddXmlDocuments(SwaggerGenOptions options)

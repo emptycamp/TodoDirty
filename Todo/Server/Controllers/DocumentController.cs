@@ -10,6 +10,7 @@ namespace Todo.Server.Controllers;
 [ApiController]
 [Route("[controller]")]
 [Produces("application/json")]
+[ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status401Unauthorized)]
 public class DocumentController : ControllerBase
 {
     private readonly IDocumentService _documentService;

@@ -15,7 +15,7 @@
 
     public class FieldError
     {
-        public string Field { get; set; } = null!;
-        public IEnumerable<string> Messages { get; set; } = null!;
+        public required string Field { get; set; }
+        public required IEnumerable<string> Messages { get; set; }
     }
-}
+};

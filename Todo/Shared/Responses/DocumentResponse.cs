@@ -1,22 +1,22 @@
 ﻿namespace Todo.Shared.Responses
 {
-    public class DocumentResponse
+    public record DocumentResponse
     {
         /// <summary>
         /// Document ID
         /// </summary>
         /// <example>1</example>
-        public int Id { get; set; }
+        public required int Id { get; set; }
 
         /// <summary>
         /// Document Title
         /// </summary>
         /// <example>Nutrition for gaining weight</example>>
-        public string Title { get; set; } = null!;
+        public required string Title { get; set; }
 
         /// <summary>
         /// Document notes
         /// </summary>
-        public List<NoteResponse> Notes { get; set; } = new();
+        public required List<NoteResponse> Notes { get; set; }
     }
 }

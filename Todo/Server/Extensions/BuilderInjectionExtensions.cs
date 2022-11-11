@@ -1,6 +1,7 @@
 ﻿using Todo.Core.Interfaces;
 using Todo.Infrastructure;
 using Todo.Server.Middlewares;
+using Todo.Server.Store;
 using Todo.Services.Interfaces;
 using Todo.Services;
 
@@ -8,23 +9,25 @@ namespace Todo.Server.Extensions
 {
     public static class BuilderInjectionExtensions
     {
-        public static WebApplicationBuilder SetupInjections(this WebApplicationBuilder builder)
+        public static IServiceCollection SetupInjections(this IServiceCollection services, IConfiguration configuration)
         {
-            builder.Services.AddTransient<ExceptionMiddleware>();
+            services.AddTransient<ExceptionMiddleware>();
 
-            builder.Services.AddScoped<IJwtService, JwtService>();
-            builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
+            services.AddScoped<IJwtService, JwtService>();
+            services.AddScoped<IAuthenticationService, AuthenticationService>();
 
-            builder.Services.AddScoped<IDocumentRepository, DocumentRepository>();
-            builder.Services.AddScoped<IDocumentService, DocumentService>();
+            services.AddScoped<IDocumentRepository, DocumentRepository>();
+            services.AddScoped<IDocumentService, DocumentService>();
 
-            builder.Services.AddScoped<INoteRepository, NoteRepository>();
-            builder.Services.AddScoped<INoteService, NoteService>();
+            services.AddScoped<INoteRepository, NoteRepository>();
+            services.AddScoped<INoteService, NoteService>();
 
-            builder.Services.AddScoped<IAudioRepository, AudioRepository>();
-            builder.Services.AddScoped<IAudioService, AudioService>();
+            services.AddScoped<IAudioRepository, AudioRepository>();
+            services.AddScoped<IAudioService, AudioService>();
 
-            return builder;
+            services.Configure<JwtConfig>(configuration.GetSection("JwtConfig"));
+
+            return services;
         }
     }
 }

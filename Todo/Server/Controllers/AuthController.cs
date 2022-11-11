@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Todo.Services.Interfaces;
 using Todo.Shared.Requests;
+using Todo.Shared.Responses.Errors;
 
 namespace Todo.Server.Controllers;
 
@@ -26,7 +27,11 @@ public class AuthController : ControllerBase
         // TODO: extract
         if (!user.Succeeded)
         {
-            return BadRequest(user);
+            return BadRequest(new ValidationErrorResponse(user.Errors.Select(x => new FieldError
+            {
+                Field = x.Code,
+                Messages = new List<string> { x.Description }
+            })));
         }
 
         return StatusCode(201);

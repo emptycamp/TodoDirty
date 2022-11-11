@@ -1,18 +1,18 @@
 ﻿namespace Todo.Shared.Responses
 {
-    public class NoteResponse
+    public record NoteResponse
     {
         /// <summary>
         /// Note ID
         /// </summary>
         /// <example>1</example>
-        public int Id { get; set; }
+        public required int Id { get; set; }
 
         /// <summary>
         /// Note title
         /// </summary>
         /// <example>Meal preps with high calorie density</example>
-        public string Title { get; set; } = null!;
+        public required string Title { get; set; }
 
         /// <summary>
         /// Note text contents
@@ -23,6 +23,6 @@
         /// <summary>
         /// Audio recordings that belong to the note
         /// </summary>
-        public List<AudioResponse> Audios { get; set; } = new();
+        public required List<AudioResponse> Audios { get; set; }
     }
 }

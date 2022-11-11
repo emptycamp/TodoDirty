@@ -8,15 +8,13 @@ namespace Todo.Shared.Requests
         /// Email address
         /// </summary>
         /// <example>user@example.com</example>
-        [Required]
         [EmailAddress]
-        public string? Email { get; set; }
+        public required string Email { get; set; }
 
         /// <summary>
         /// Password
         /// </summary>
         /// <example>example</example>
-        [Required]
-        public string? Password { get; set; }
+        public required string Password { get; set; }
     }
 }
