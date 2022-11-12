@@ -11,9 +11,9 @@ namespace Todo.Infrastructure
         {
         }
 
-        public async Task<Note> AddNote(int id, Note note)
+        public async Task<Note> AddNote(int documentId, Note note)
         {
-            var document = await FindByIdOrThrow(id);
+            var document = await FindByIdOrThrow(documentId);
             document.Notes.Add(note);
             await Context.SaveChangesAsync();
 

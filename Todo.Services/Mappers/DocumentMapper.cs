@@ -1,7 +1,9 @@
 ﻿using AutoMapper;
+using Todo.Core.Exceptions;
 using Todo.Core.Models;
 using Todo.Shared.Requests;
 using Todo.Shared.Responses;
+using Todo.Shared.Responses.Errors;
 
 namespace Todo.Services.Mappers
 {
@@ -19,6 +21,8 @@ namespace Todo.Services.Mappers
             CreateMap<Audio, AudioResponse>();
 
             CreateMap<CreateUserRequest, User>();
+
+            CreateMap<ValidationException, ValidationErrorResponse>();
         }
     }
 }

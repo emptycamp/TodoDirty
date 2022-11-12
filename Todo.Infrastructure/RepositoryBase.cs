@@ -53,9 +53,8 @@ namespace Todo.Infrastructure
             return entity;
         }
 
-        public virtual async Task Delete(TKey id)
+        public virtual async Task Delete(TEntity entity)
         {
-            var entity = await FindByIdOrThrow(id);
             Table.Remove(entity);
             await Context.SaveChangesAsync();
         }

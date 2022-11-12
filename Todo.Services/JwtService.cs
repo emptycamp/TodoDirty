@@ -41,7 +41,7 @@ namespace Todo.Services
         {
             var claims = new List<Claim>
             {
-                new(ClaimTypes.Name, user.UserName)
+                new(ClaimTypes.NameIdentifier, user.Id.ToString())
             };
 
             var roles = await _userManager.GetRolesAsync(user);

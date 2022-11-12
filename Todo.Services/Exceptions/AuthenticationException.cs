@@ -2,6 +2,8 @@
 {
     public class AuthenticationException: Exception
     {
-        public AuthenticationException() : base("Invalid credentials") { }
+        public AuthenticationException() : base("Invalid credentials")
+        {
+        }
     }
 }

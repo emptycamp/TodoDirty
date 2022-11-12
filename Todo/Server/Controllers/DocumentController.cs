@@ -11,7 +11,7 @@ namespace Todo.Server.Controllers;
 [Route("[controller]")]
 [Produces("application/json")]
 [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status401Unauthorized)]
-public class DocumentController : ControllerBase
+public class DocumentController : ApiControllerBase
 {
     private readonly IDocumentService _documentService;
 
@@ -103,7 +103,7 @@ public class DocumentController : ControllerBase
     [ProducesResponseType(typeof(ValidationErrorResponse), StatusCodes.Status422UnprocessableEntity)]
     public async Task<IActionResult> CreateDocument(CreateDocumentRequest document)
     {
-        var createdDocument = await _documentService.CreateEntity(document);
+        var createdDocument = await _documentService.CreateEntity(document, UserId);
         return CreatedAtAction("GetDocument", new { id = createdDocument.Id }, createdDocument);
     }
 
@@ -121,7 +121,7 @@ public class DocumentController : ControllerBase
     [ProducesResponseType(typeof(ValidationErrorResponse), StatusCodes.Status422UnprocessableEntity)]
     public async Task<IActionResult> UpdateDocument(int id, CreateDocumentRequest document)
     {
-        var createdDocument = await _documentService.UpdateEntity(id, document);
+        var createdDocument = await _documentService.UpdateEntity(id, document, UserId);
         return Ok(createdDocument);
     }
 
@@ -136,7 +136,7 @@ public class DocumentController : ControllerBase
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> DeleteDocument(int id)
     {
-        await _documentService.DeleteEntity(id);
+        await _documentService.DeleteEntity(id, UserId);
         return Ok();
     }
 }

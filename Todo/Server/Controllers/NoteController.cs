@@ -8,7 +8,7 @@ namespace Todo.Server.Controllers;
 
 [ApiController]
 [Route("[controller]")]
-public class NoteController : ControllerBase
+public class NoteController : ApiControllerBase
 {
     private readonly INoteService _noteService;
 
@@ -36,7 +36,7 @@ public class NoteController : ControllerBase
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> CreateNote(CreateNoteRequest note)
     {
-        var createdDocument = await _noteService.CreateEntity(note);
+        var createdDocument = await _noteService.CreateEntity(note, UserId);
         return CreatedAtAction("GetNote", new { id = createdDocument.Id }, createdDocument);
     }
 
@@ -45,7 +45,7 @@ public class NoteController : ControllerBase
     public async Task<IActionResult> UpdateNote(int id, CreateNoteRequest note)
     {
         // TODO: add validation
-        var createdNote = await _noteService.UpdateEntity(id, note);
+        var createdNote = await _noteService.UpdateEntity(id, note, UserId);
         return Ok(createdNote);
     }
 
@@ -54,7 +54,7 @@ public class NoteController : ControllerBase
     public async Task<IActionResult> DeleteNote(int id)
     {
         // TODO: add validation
-        await _noteService.DeleteEntity(id);
+        await _noteService.DeleteEntity(id, UserId);
         return Ok();
     }
 }

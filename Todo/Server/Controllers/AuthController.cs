@@ -23,17 +23,6 @@ public class AuthController : ControllerBase
     public async Task<IActionResult> RegisterUser(CreateUserRequest userDto)
     {
         var user = await _authService.CreateUserAsync(userDto);
-
-        // TODO: extract
-        if (!user.Succeeded)
-        {
-            return BadRequest(new ValidationErrorResponse(user.Errors.Select(x => new FieldError
-            {
-                Field = x.Code,
-                Messages = new List<string> { x.Description }
-            })));
-        }
-
         return StatusCode(201);
     }
 

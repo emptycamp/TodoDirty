@@ -1,9 +1,14 @@
-﻿namespace Todo.Core.Models
+﻿using System.ComponentModel.DataAnnotations.Schema;
+
+namespace Todo.Core.Models
 {
-    public class Document: EntityBase
+    public class Document : EntityBase
     {
         public required string Title { get; set; }
+        public List<Note> Notes { get; set; } = new();
 
-        public required List<Note> Notes { get; set; } 
+        [ForeignKey(nameof(User))]
+        public required Guid UserId { get; set; }
+        public required User User { get; set; }
     }
 }

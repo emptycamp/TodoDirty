@@ -3,6 +3,6 @@ using Todo.Shared.Responses;
 
 namespace Todo.Services.Interfaces;
 
-public interface INoteService: ICrudService<CreateNoteRequest, NoteResponse>
+public interface INoteService : ICrudService<CreateNoteRequest, NoteResponse>, ICreateImpersonate<CreateNoteRequest, NoteResponse>
 {
 }

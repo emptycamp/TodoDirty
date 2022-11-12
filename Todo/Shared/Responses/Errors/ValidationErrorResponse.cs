@@ -1,4 +1,6 @@
-﻿namespace Todo.Shared.Responses.Errors
+﻿using Todo.Core.Exceptions;
+
+namespace Todo.Shared.Responses.Errors
 {
     public class ValidationErrorResponse : ErrorResponse
     {

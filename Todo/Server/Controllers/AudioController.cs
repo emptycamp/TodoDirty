@@ -9,7 +9,7 @@ namespace Todo.Server.Controllers;
 
 [ApiController]
 [Route("[controller]")]
-public class AudioController : ControllerBase
+public class AudioController : ApiControllerBase
 {
     private readonly IAudioService _audioService;
 
@@ -37,7 +37,7 @@ public class AudioController : ControllerBase
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> CreateAudio(CreateAudioRequest audio)
     {
-        var createdDocument = await _audioService.CreateEntity(audio);
+        var createdDocument = await _audioService.CreateEntity(audio, UserId);
         return CreatedAtAction("GetAudio", new { id = createdDocument.Id }, createdDocument);
     }
 
@@ -45,7 +45,7 @@ public class AudioController : ControllerBase
     [ProducesResponseType(typeof(AudioResponse), StatusCodes.Status200OK)]
     public async Task<IActionResult> UpdateAudio(int id, CreateAudioRequest audio)
     {
-        var createdAudio = await _audioService.UpdateEntity(id, audio);
+        var createdAudio = await _audioService.UpdateEntity(id, audio, UserId);
         return Ok(createdAudio);
     }
 
@@ -53,7 +53,7 @@ public class AudioController : ControllerBase
     [ProducesResponseType(StatusCodes.Status200OK)]
     public async Task<IActionResult> DeleteAudio(int id)
     {
-        await _audioService.DeleteEntity(id);
+        await _audioService.DeleteEntity(id, UserId);
         return Ok();
     }
 }

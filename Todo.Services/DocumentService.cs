@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Todo.Core.Interfaces;
 using Todo.Core.Models;
+using Todo.Server.Exceptions;
 using Todo.Services.Interfaces;
 using Todo.Shared.Requests;
 using Todo.Shared.Responses;
@@ -53,26 +54,40 @@ public class DocumentService : IDocumentService
         return documentDto;
     }
 
-    public async Task<DocumentResponse> CreateEntity(CreateDocumentRequest entityDto)
+    public async Task<DocumentResponse> CreateEntity(CreateDocumentRequest entityDto, Guid userId)
     {
         var document = _mapper.Map<Document>(entityDto);
+        document.UserId = userId;
+
         var createdDocument = await _documentRepository.Create(document);
         var createdDocumentDto = _mapper.Map<DocumentResponse>(createdDocument);
         return createdDocumentDto;
     }
 
-    public async Task<DocumentResponse> UpdateEntity(int id, CreateDocumentRequest entityDto)
+    public async Task<DocumentResponse> UpdateEntity(int id, CreateDocumentRequest entityDto, Guid? userId)
     {
         var document = _mapper.Map<Document>(entityDto);
         document.Id = id;
+
+        var documentEntity = await _documentRepository.FindByIdOrThrow(id);
+        if (userId != null && documentEntity.UserId != userId)
+        {
+            throw new UnauthorizedException("Document does not belong to current user");
+        }
 
         var updatedDocument = await _documentRepository.Update(document);
         var updatedDocumentDto = _mapper.Map<DocumentResponse>(updatedDocument);
         return updatedDocumentDto;
     }
 
-    public async Task DeleteEntity(int id)
+    public async Task DeleteEntity(int id, Guid? userId)
     {
-        await _documentRepository.Delete(id);
+        var documentEntity = await _documentRepository.FindByIdOrThrow(id);
+        if (userId != null && documentEntity.UserId != userId)
+        {
+            throw new UnauthorizedException("Document does not belong to current user");
+        }
+
+        await _documentRepository.Delete(documentEntity);
     }
 }
