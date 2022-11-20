@@ -5,7 +5,7 @@ using Swashbuckle.AspNetCore.SwaggerGen;
 
 namespace Todo.Server.Extensions
 {
-    public static class BuilderSwaggerExtensions
+    public static class SwaggerServiceExtensions
     {
         public static IServiceCollection SetupSwagger(this IServiceCollection services)
         {

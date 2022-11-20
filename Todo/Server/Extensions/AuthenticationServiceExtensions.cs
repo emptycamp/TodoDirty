@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
 using Todo.Core.Models;
 using Todo.Infrastructure;
-using Todo.Server.Store;
+using Todo.Shared.Store;
 
 namespace Todo.Server.Extensions
 {

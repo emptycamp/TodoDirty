@@ -4,7 +4,7 @@ using Todo.Server.Filters;
 
 namespace Todo.Server.Extensions
 {
-    public static class BuilderActionFilterExtensions
+    public static class ActionFilterServiceExtensions
     {
         public static IServiceCollection SetupActionFilters(this IServiceCollection services)
         {

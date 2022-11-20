@@ -1,13 +1,13 @@
 ﻿using Todo.Core.Interfaces;
 using Todo.Infrastructure;
 using Todo.Server.Middlewares;
-using Todo.Server.Store;
 using Todo.Services.Interfaces;
 using Todo.Services;
+using Todo.Shared.Store;
 
 namespace Todo.Server.Extensions
 {
-    public static class BuilderInjectionExtensions
+    public static class InjectionServiceExtensions
     {
         public static IServiceCollection SetupInjections(this IServiceCollection services, IConfiguration configuration)
         {

@@ -5,8 +5,8 @@ using System.Security.Claims;
 using System.Text;
 using Microsoft.Extensions.Options;
 using Todo.Core.Models;
-using Todo.Server.Store;
 using Todo.Services.Interfaces;
+using Todo.Shared.Store;
 
 namespace Todo.Services
 {
