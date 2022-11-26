@@ -12,7 +12,7 @@ namespace Todo.Infrastructure
 
         public async Task<Audio> AddAudio(int id, Audio audio)
         {
-            var note = await FindByIdOrThrow(id);
+            var note = await FindByIdOrThrowTracked(id);
             note.Audios.Add(audio);
             await Context.SaveChangesAsync();
 

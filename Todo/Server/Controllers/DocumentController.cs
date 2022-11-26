@@ -121,7 +121,7 @@ public class DocumentController : ApiControllerBase
     [ProducesResponseType(typeof(ValidationErrorResponse), StatusCodes.Status422UnprocessableEntity)]
     public async Task<IActionResult> UpdateDocument(int id, CreateDocumentRequest document)
     {
-        var createdDocument = await _documentService.UpdateEntity(id, document, UserId);
+        var createdDocument = await _documentService.UpdateEntity(id, document, IsAdmin ? null : UserId);
         return Ok(createdDocument);
     }
 
@@ -136,7 +136,7 @@ public class DocumentController : ApiControllerBase
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> DeleteDocument(int id)
     {
-        await _documentService.DeleteEntity(id, UserId);
+        await _documentService.DeleteEntity(id, IsAdmin ? null : UserId);
         return Ok();
     }
 }

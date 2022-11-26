@@ -25,12 +25,17 @@ namespace Todo.Infrastructure
 
         public virtual async Task<TEntity> FindByIdOrThrow(TKey id)
         {
+            return await Table.AsNoTracking().FirstOrDefaultAsync(x => x.Id!.Equals(id)) ?? throw new NotFoundException(typeof(TEntity).Name);
+        }
+
+        protected async Task<TEntity> FindByIdOrThrowTracked(TKey id)
+        {
             return await Table.FindAsync(id) ?? throw new NotFoundException(typeof(TEntity).Name);
         }
 
         public virtual async Task<ICollection<TEntity>> GetAll(int limit = 1000, int offset = 0)
         {
-            return await Table.Skip(offset).Take(limit).ToListAsync();
+            return await Table.AsNoTracking().Skip(offset).Take(limit).ToListAsync();
         }
 
         public virtual async Task<TEntity> Create(TEntity entity)

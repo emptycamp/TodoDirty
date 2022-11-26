@@ -38,13 +38,15 @@ namespace Todo.Services
         public async Task<AudioResponse> CreateEntity(CreateAudioRequest entityDto, Guid userId)
         {
             var audio = _mapper.Map<Audio>(entityDto);
-            audio.UserId = userId;
 
             var noteEntity = await _noteRepository.FindByIdOrThrow(entityDto.NoteId);
             if (noteEntity.UserId != userId)
             {
                 throw new UnauthorizedException("Note does not belong to current user");
             }
+
+            audio.Id = noteEntity.Id;
+            audio.UserId = noteEntity.UserId;
 
             var createdAudio = await _noteRepository.AddAudio(entityDto.NoteId, audio);
             var createdAudioDto = _mapper.Map<AudioResponse>(createdAudio);

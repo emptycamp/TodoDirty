@@ -47,7 +47,7 @@ public class NoteController : ApiControllerBase
     [ProducesResponseType(typeof(NoteResponse), StatusCodes.Status200OK)]
     public async Task<IActionResult> UpdateNote(int id, CreateNoteRequest note)
     {
-        var createdNote = await _noteService.UpdateEntity(id, note, UserId);
+        var createdNote = await _noteService.UpdateEntity(id, note, IsAdmin ? null : UserId);
         return Ok(createdNote);
     }
 
@@ -55,7 +55,7 @@ public class NoteController : ApiControllerBase
     [ProducesResponseType(StatusCodes.Status200OK)]
     public async Task<IActionResult> DeleteNote(int id)
     {
-        await _noteService.DeleteEntity(id, UserId);
+        await _noteService.DeleteEntity(id, IsAdmin ? null : UserId);
         return Ok();
     }
 }

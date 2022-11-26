@@ -67,13 +67,15 @@ public class DocumentService : IDocumentService
     public async Task<DocumentResponse> UpdateEntity(int id, CreateDocumentRequest entityDto, Guid? userId)
     {
         var document = _mapper.Map<Document>(entityDto);
-        document.Id = id;
 
         var documentEntity = await _documentRepository.FindByIdOrThrow(id);
         if (userId != null && documentEntity.UserId != userId)
         {
             throw new UnauthorizedException("Document does not belong to current user");
         }
+
+        document.Id = id;
+        document.UserId = documentEntity.UserId;
 
         var updatedDocument = await _documentRepository.Update(document);
         var updatedDocumentDto = _mapper.Map<DocumentResponse>(updatedDocument);
@@ -82,6 +84,7 @@ public class DocumentService : IDocumentService
 
     public async Task DeleteEntity(int id, Guid? userId)
     {
+        // TODO# cascade on delete
         var documentEntity = await _documentRepository.FindByIdOrThrow(id);
         if (userId != null && documentEntity.UserId != userId)
         {

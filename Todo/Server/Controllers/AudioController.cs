@@ -48,7 +48,7 @@ public class AudioController : ApiControllerBase
     [ProducesResponseType(typeof(AudioResponse), StatusCodes.Status200OK)]
     public async Task<IActionResult> UpdateAudio(int id, CreateAudioRequest audio)
     {
-        var createdAudio = await _audioService.UpdateEntity(id, audio, UserId);
+        var createdAudio = await _audioService.UpdateEntity(id, audio, IsAdmin ? null : UserId);
         return Ok(createdAudio);
     }
 
@@ -56,7 +56,7 @@ public class AudioController : ApiControllerBase
     [ProducesResponseType(StatusCodes.Status200OK)]
     public async Task<IActionResult> DeleteAudio(int id)
     {
-        await _audioService.DeleteEntity(id, UserId);
+        await _audioService.DeleteEntity(id, IsAdmin ? null : UserId);
         return Ok();
     }
 }

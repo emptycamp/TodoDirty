@@ -71,6 +71,7 @@ namespace Todo.Services
                     throw new UnauthorizedException();
                 }
 
+                // TODO# prevent new token generation if old one is valid
                 return await GenerateAccessTokenAsync(refreshToken.User);
             }
             catch (Exception)

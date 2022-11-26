@@ -66,13 +66,15 @@ public class NoteService : INoteService
     public async Task<NoteResponse> UpdateEntity(int id, CreateNoteRequest entityDto, Guid? userId)
     {
         var note = _mapper.Map<Note>(entityDto);
-        note.Id = id;
 
         var noteEntity = await _noteRepository.FindByIdOrThrow(id);
         if (userId != null && noteEntity.UserId != userId)
         {
             throw new UnauthorizedException("Note does not belong to current user");
         }
+
+        note.Id = id;
+        note.UserId = noteEntity.UserId;
 
         var updatedNote = await _noteRepository.Update(note);
         var updatedNoteDto = _mapper.Map<NoteResponse>(updatedNote);
