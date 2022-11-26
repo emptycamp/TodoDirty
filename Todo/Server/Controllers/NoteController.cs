@@ -3,11 +3,14 @@ using Todo.Services.Interfaces;
 using Todo.Shared.Queries;
 using Todo.Shared.Requests;
 using Todo.Shared.Responses;
+using Todo.Shared.Responses.Errors;
 
 namespace Todo.Server.Controllers;
 
 [ApiController]
 [Route("[controller]")]
+[Produces("application/json")]
+[ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status401Unauthorized)]
 public class NoteController : ApiControllerBase
 {
     private readonly INoteService _noteService;
@@ -44,7 +47,6 @@ public class NoteController : ApiControllerBase
     [ProducesResponseType(typeof(NoteResponse), StatusCodes.Status200OK)]
     public async Task<IActionResult> UpdateNote(int id, CreateNoteRequest note)
     {
-        // TODO: add validation
         var createdNote = await _noteService.UpdateEntity(id, note, UserId);
         return Ok(createdNote);
     }
@@ -53,7 +55,6 @@ public class NoteController : ApiControllerBase
     [ProducesResponseType(StatusCodes.Status200OK)]
     public async Task<IActionResult> DeleteNote(int id)
     {
-        // TODO: add validation
         await _noteService.DeleteEntity(id, UserId);
         return Ok();
     }

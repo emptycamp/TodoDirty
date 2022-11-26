@@ -27,25 +27,35 @@ namespace Todo.Server.Extensions
                 throw new NullReferenceException("JwtConfig settings are missing in appsettings.json");
             }
 
+            var tokenValidationParameters = SetupTokenValidation(services, jwtConfig);
+
             services.AddAuthentication(options =>
-                {
-                    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-                    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-                    options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
-                })
-                .AddJwtBearer(options =>
-                {
-                    options.TokenValidationParameters = new TokenValidationParameters
-                    {
-                        ValidateIssuer = false,
-                        ValidateAudience = false,
-                        ValidateLifetime = false,
-                        ValidateIssuerSigningKey = false,
-                        ValidIssuer = jwtConfig.ValidIssuer,
-                        ValidAudience = jwtConfig.ValidAudience,
-                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtConfig.Secret))
-                    };
-                });
+            {
+                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+            })
+            .AddJwtBearer(options =>
+            {
+                options.TokenValidationParameters = tokenValidationParameters;
+            });
+        }
+
+        private static TokenValidationParameters SetupTokenValidation(IServiceCollection services, JwtConfig jwtConfig)
+        {
+            var tokenValidationParameters = new TokenValidationParameters
+            {
+                ValidateIssuer = false,
+                ValidateAudience = false,
+                ValidateLifetime = false,
+                ValidateIssuerSigningKey = false,
+                ValidIssuer = jwtConfig.ValidIssuer,
+                ValidAudience = jwtConfig.ValidAudience,
+                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtConfig.Secret))
+            };
+
+            services.AddSingleton(tokenValidationParameters);
+            return tokenValidationParameters;
         }
 
         private static void AddIdentity(IServiceCollection services)

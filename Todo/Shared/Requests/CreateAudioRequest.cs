@@ -1,6 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
-
-namespace Todo.Shared.Requests
+﻿namespace Todo.Shared.Requests
 {
     public record CreateAudioRequest
     {

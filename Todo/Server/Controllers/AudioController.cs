@@ -3,12 +3,15 @@ using Todo.Services.Interfaces;
 using Todo.Shared.Queries;
 using Todo.Shared.Requests;
 using Todo.Shared.Responses;
+using Todo.Shared.Responses.Errors;
 
 
 namespace Todo.Server.Controllers;
 
 [ApiController]
 [Route("[controller]")]
+[Produces("application/json")]
+[ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status401Unauthorized)]
 public class AudioController : ApiControllerBase
 {
     private readonly IAudioService _audioService;

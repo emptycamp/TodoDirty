@@ -25,6 +25,8 @@ namespace Todo.Server.Extensions
             services.AddScoped<IAudioRepository, AudioRepository>();
             services.AddScoped<IAudioService, AudioService>();
 
+            services.AddScoped<ITokenRepository, TokenRepository>();
+
             services.Configure<JwtConfig>(configuration.GetSection("JwtConfig"));
 
             return services;

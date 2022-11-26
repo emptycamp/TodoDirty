@@ -1,15 +1,16 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Todo.Services.Interfaces;
-using Todo.Shared.Requests;
+using Todo.Shared.Requests.Auth;
 using Todo.Shared.Responses.Errors;
 
 namespace Todo.Server.Controllers;
 
 [ApiController]
 [Route("[controller]")]
-[Produces("application/json")]
 [AllowAnonymous]
+[Produces("application/json")]
+[ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status401Unauthorized)]
 public class AuthController : ControllerBase
 {
     private readonly IAuthenticationService _authService;
@@ -23,6 +24,7 @@ public class AuthController : ControllerBase
     public async Task<IActionResult> RegisterUser(CreateUserRequest userDto)
     {
         var user = await _authService.CreateUserAsync(userDto);
+        // TODO# add Location header
         return StatusCode(201);
     }
 
@@ -31,5 +33,12 @@ public class AuthController : ControllerBase
     {
         var user = await _authService.AuthenticateUserAsync(userDto);
         return Ok(user);
+    }
+
+    [HttpPost("/Refresh")]
+    public async Task<IActionResult> RefreshToken(RefreshTokenRequest refreshToken)
+    {
+        var accessTokenResponse = await _authService.RefreshToken(refreshToken);
+        return Ok(accessTokenResponse);
     }
 }

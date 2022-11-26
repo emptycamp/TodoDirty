@@ -2,7 +2,9 @@
 using Todo.Core.Exceptions;
 using Todo.Core.Models;
 using Todo.Shared.Requests;
+using Todo.Shared.Requests.Auth;
 using Todo.Shared.Responses;
+using Todo.Shared.Responses.Auth;
 using Todo.Shared.Responses.Errors;
 
 namespace Todo.Services.Mappers
@@ -11,7 +13,7 @@ namespace Todo.Services.Mappers
     {
         public DocumentMapper()
         {
-            // TODO: extract to seperate mappers
+            // TODO: extract to separate mappers
             CreateMap<CreateDocumentRequest, Document>();
             CreateMap<CreateNoteRequest, Note>();
             CreateMap<CreateAudioRequest, Audio>();
@@ -23,6 +25,8 @@ namespace Todo.Services.Mappers
             CreateMap<CreateUserRequest, User>();
 
             CreateMap<ValidationException, ValidationErrorResponse>();
+
+            CreateMap<RefreshTokenRequest, AccessTokenResponse>();
         }
     }
 }

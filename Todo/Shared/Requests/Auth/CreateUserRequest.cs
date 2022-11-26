@@ -1,8 +1,8 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace Todo.Shared.Requests
+namespace Todo.Shared.Requests.Auth
 {
-    public class AuthenticateUserRequest
+    public class CreateUserRequest
     {
         /// <summary>
         /// Email address
@@ -10,6 +10,12 @@ namespace Todo.Shared.Requests
         /// <example>user@example.com</example>
         [EmailAddress]
         public required string Email { get; set; }
+
+        /// <summary>
+        /// User name
+        /// </summary>
+        /// <example>user</example>
+        public required string UserName { get; set; }
 
         /// <summary>
         /// Password

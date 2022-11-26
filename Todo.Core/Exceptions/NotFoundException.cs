@@ -2,7 +2,9 @@
 {
     public class NotFoundException: Exception
     {
-        public NotFoundException(string field) : base(GenerateMessage(field)) { }
+        public NotFoundException(string field) : base(GenerateMessage(field))
+        {
+        }
 
         private static string GenerateMessage(string field)
         {

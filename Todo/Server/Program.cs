@@ -46,6 +46,4 @@ app.MapFallbackToFile("index.html");
 
 app.Run();
 
-// TODO: seeds
-// TODO: roles
 // TODO: deploy

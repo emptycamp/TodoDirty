@@ -1,6 +1,4 @@
-﻿using Todo.Core.Models;
-
-namespace Todo.Services.Interfaces;
+﻿namespace Todo.Services.Interfaces;
 
 public interface ICrudService<in TRequest, TResponse> : ICrudService<TRequest, TResponse, int>
 {

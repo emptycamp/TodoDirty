@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Todo.Core.Models;
-using Todo.Infrastructure.Seeds;
 
 namespace Todo.Infrastructure
 {
@@ -10,6 +9,7 @@ namespace Todo.Infrastructure
         public DbSet<Document> Documents => Set<Document>();
         public DbSet<Note> Notes => Set<Note>();
         public DbSet<Audio> Audios => Set<Audio>();
+        public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
 
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
         {

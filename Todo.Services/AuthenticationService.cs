@@ -1,13 +1,11 @@
-﻿using System.ComponentModel.DataAnnotations;
-using AutoMapper;
+﻿using AutoMapper;
 using Microsoft.AspNetCore.Identity;
-using Todo.Core.Exceptions;
 using Todo.Core.Models;
 using Todo.Services.Exceptions;
 using Todo.Services.Interfaces;
 using Todo.Shared.Requests;
-using Todo.Shared.Responses;
-using Todo.Shared.Responses.Errors;
+using Todo.Shared.Requests.Auth;
+using Todo.Shared.Responses.Auth;
 using FieldError = Todo.Core.Exceptions.FieldError;
 using ValidationException = Todo.Core.Exceptions.ValidationException;
 
@@ -43,20 +41,28 @@ namespace Todo.Services
             return result;
         }
 
-        public async Task<JwtTokenResponse> AuthenticateUserAsync(AuthenticateUserRequest authenticateUserDto)
+        public async Task<AccessTokenResponse> AuthenticateUserAsync(AuthenticateUserRequest authenticateUserDto)
         {
             var user = await _userManager.FindByEmailAsync(authenticateUserDto.Email);
             var userIsValid = user != null && await _userManager.CheckPasswordAsync(user, authenticateUserDto.Password);
 
             if (userIsValid)
             {
-                return new JwtTokenResponse
+                return new AccessTokenResponse
                 {
-                    Token = await _jwtService.CreateTokenAsync(user!)
+                    Token = await _jwtService.GenerateAccessTokenAsync(user!),
+                    RefreshToken = await _jwtService.GenerateRefreshToken(user!)
                 };
             }
 
             throw new AuthenticationException();
+        }
+
+        public async Task<AccessTokenResponse> RefreshToken(RefreshTokenRequest refreshToken)
+        {
+            var accessTokenResponse = _mapper.Map<AccessTokenResponse>(refreshToken);
+            accessTokenResponse.Token = await _jwtService.RefreshAccessTokenAsync(refreshToken);
+            return accessTokenResponse;
         }
     }
 }
