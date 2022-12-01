@@ -16,7 +16,8 @@ builder.Services
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
+// TODO: temp
+if (true || app.Environment.IsDevelopment())
 {
     await app.SeedDatabase();
     app.UseWebAssemblyDebugging();
@@ -45,5 +46,3 @@ app.MapControllers();
 app.MapFallbackToFile("index.html");
 
 app.Run();
-
-// TODO: deploy
