@@ -5,12 +5,12 @@
         <NavMenu />
     </div>
 
-    <main>
+    <main style="overflow: hidden">
         <div class="top-row px-4">
             <a href="https://docs.microsoft.com/aspnet/" target="_blank">About</a>
         </div>
 
-        <article class="content px-4">
+        <article class="content px-4" style="height: calc(100vh - 96px)">
             @Body
         </article>
     </main>

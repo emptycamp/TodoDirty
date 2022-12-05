@@ -1,5 +1,7 @@
 ﻿@page "/fetchdata"
+@attribute [Authorize]
 @using Todo.Shared
+@using Microsoft.AspNetCore.Authorization
 @inject HttpClient Http
 
 <PageTitle>Weather forecast</PageTitle>

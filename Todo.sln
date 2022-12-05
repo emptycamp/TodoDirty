@@ -15,7 +15,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Todo.Infrastructure", "Todo
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Todo.Core", "Todo.Core\Todo.Core.csproj", "{A91EBA14-4D38-430B-AB17-15C01467D559}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Todo.Utils", "Todo.Utils\Todo.Utils.csproj", "{01FCF079-E849-444E-9564-29F62E05EB61}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Todo.Utils", "Todo.Utils\Todo.Utils.csproj", "{01FCF079-E849-444E-9564-29F62E05EB61}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

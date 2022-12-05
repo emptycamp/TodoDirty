@@ -1,0 +1,80 @@
+﻿@page "/Login"
+@attribute [AllowAnonymous]
+@using Microsoft.AspNetCore.Components
+@using Todo.Shared.Requests.Auth
+@using Todo.Shared.Responses.Auth
+@using System.Net
+@using Microsoft.AspNetCore.Authorization
+@inject AuthenticationStateProvider AuthStateProvider
+@inject JwtAuthService JwtAuthService
+@inject HttpClient HttpClient
+@inject NavigationManager NavigationManager
+
+
+<EditForm Model="@_model" OnValidSubmit="OnValidSubmit">
+    <DataAnnotationsValidator />
+    <MudGrid>
+        <MudItem xs="12" sm="7">
+            <MudCard>
+                <MudCardContent>
+                    <MudTextField Label="Email" Class="mt-3"
+                                  @bind-Value="_model.Email" For="@(() => _model.Email)" />
+                    <MudTextField Label="Password" Class="mt-3"
+                                  @bind-Value="_model.Password" For="@(() => _model.Password)" InputType="InputType.Password" />
+                </MudCardContent>
+                <MudCardActions>
+                    <MudButton ButtonType="ButtonType.Button" @onclick="Authenticate" Variant="Variant.Filled" Color="Color.Primary" Class="ml-auto">Login</MudButton>
+                </MudCardActions>
+            </MudCard>
+        </MudItem>
+        <MudItem xs="12" sm="5">
+            <MudPaper Class="pa-4 mud-height-full">
+                <MudText Typo="Typo.subtitle2">Validation Summary</MudText>
+                @if(!_success)
+                {
+                    <MudText Color="@Color.Error">
+                        <ValidationSummary />
+                    </MudText>
+                }
+            </MudPaper>
+        </MudItem>
+    </MudGrid>
+</EditForm>
+
+
+@code {
+
+    readonly AuthenticateUserRequest _model = new()
+    {
+        Email = "",
+        Password = ""
+    };
+
+    bool _success;
+
+    private void OnValidSubmit(EditContext context)
+    {
+        _success = true;
+        StateHasChanged();
+    }
+
+    private async Task Authenticate()
+    {
+        var response = await HttpClient.PostAsJsonAsync("api/v1/Auth/login", _model);
+
+        if (response.StatusCode == HttpStatusCode.Unauthorized)
+        {
+            // TODO: show invalid details error
+        }
+        else if (response.IsSuccessStatusCode)
+        {
+            var tokenInfo = await response.Content.ReadFromJsonAsync<AccessTokenResponse>();
+            if (tokenInfo != null)
+            {
+                await JwtAuthService.StoreTokenToLocalStorage(tokenInfo.Token, tokenInfo.RefreshToken);
+                await AuthStateProvider.GetAuthenticationStateAsync();
+                NavigationManager.NavigateTo("/");
+            }
+        }
+    }
+}

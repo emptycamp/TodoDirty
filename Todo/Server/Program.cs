@@ -13,6 +13,11 @@ builder.Services
     .AddAutoMapper(typeof(DocumentMapper))
     .AddRazorPages();
 
+builder.Services.AddApiVersioning(opt =>
+{
+    opt.DefaultApiVersion = new Microsoft.AspNetCore.Mvc.ApiVersion(1, 0);
+});
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

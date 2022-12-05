@@ -9,7 +9,8 @@ using Todo.Shared.Responses.Errors;
 namespace Todo.Server.Controllers;
 
 [ApiController]
-[Route("[controller]")]
+[Route("api/v{version:apiVersion}/[controller]")]
+[ApiVersion("1")]
 [Produces("application/json")]
 [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status401Unauthorized)]
 public class AudioController : ApiControllerBase

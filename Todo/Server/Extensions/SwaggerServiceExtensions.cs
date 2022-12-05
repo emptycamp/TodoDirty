@@ -23,6 +23,12 @@ namespace Todo.Server.Extensions
                 AddXmlDocuments(options);
             });
 
+            services.AddVersionedApiExplorer(setup =>
+            {
+                setup.GroupNameFormat = "'v'VVV";
+                setup.SubstituteApiVersionInUrl = true;
+            });
+
             return services;
         }
 
