@@ -14,5 +14,13 @@ namespace Todo.Infrastructure
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
         {
         }
+
+        protected override void OnModelCreating(ModelBuilder builder)
+        {
+            base.OnModelCreating(builder);
+
+            builder.Entity<Document>().HasMany(x => x.Notes).WithOne(x => x.Document).OnDelete(DeleteBehavior.ClientCascade);
+            builder.Entity<Note>().HasMany(x => x.Audios).WithOne(x => x.Note).OnDelete(DeleteBehavior.ClientCascade);
+        }
     }
 }

@@ -1,51 +1,8 @@
 ﻿@page "/"
-@attribute [Authorize]
-@using Todo.Shared.Responses
-@using Microsoft.AspNetCore.Authorization
-@inject HttpClient HttpClient
 
-<MudTable Items="@_elements"
-          Dense="false"
-          Hover="true"
-          Bordered="false"
-          Striped="false"
-          Filter="new Func<DocumentResponse,bool>(TableFilter)" @bind-SelectedItem="_selectedItem">
-    <ToolBarContent>
-        <MudText Typo="Typo.h6">Periodic Elements</MudText>
-        <MudSpacer />
-        <MudTextField @bind-Value="_searchString" Placeholder="Search" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
-    </ToolBarContent>
-    <HeaderContent>
-        <MudTh>ID</MudTh>
-        <MudTh>Title</MudTh>
-        <MudTh>User</MudTh>
-    </HeaderContent>
-    <RowTemplate>
-        <MudTd DataLabel="ID">@context.Id</MudTd>
-        <MudTd DataLabel="Title">@context.Title</MudTd>
-        <MudTd DataLabel="User">Username</MudTd>
-    </RowTemplate>
-    <PagerContent>
-        <MudTablePager />
-    </PagerContent>
-</MudTable>
+<MudText>There is nothing here</MudText>
+<img src="https://p.bigstockphoto.com/vVu7XprxSayr867oA3KQ_bigstock-Colorful-fruit-pattern-of-fres-282127069.jpg" style="max-width: 500px; width: 100%;" />
 
 @code {
-    private string _searchString = "";
-    private DocumentResponse? _selectedItem;
-    private HashSet<DocumentResponse> _selectedItems = new();
 
-    private IEnumerable<DocumentResponse>? _elements = new List<DocumentResponse>();
-
-    protected override async Task OnInitializedAsync()
-    {
-        _elements = await HttpClient.GetFromJsonAsync<List<DocumentResponse>>("api/v1/Document");
-    }
-
-    private bool TableFilter(DocumentResponse element) => FilterByTitle(element, _searchString);
-
-    private static bool FilterByTitle(DocumentResponse element, string searchString)
-    {
-        return string.IsNullOrWhiteSpace(searchString) || element.Title.Contains(searchString, StringComparison.OrdinalIgnoreCase);
-    }
 }

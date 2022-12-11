@@ -1,4 +1,6 @@
-﻿namespace Todo.Shared.Responses
+﻿using Todo.Core.Models;
+
+namespace Todo.Shared.Responses
 {
     public record AudioResponse
     {
@@ -13,5 +15,7 @@
         /// </summary>
         /// <example>/audios/c0342f19-32ec-4bdf-88d1-a5f20e89e9c4.mp3</example>
         public required string Path { get; set; }
+
+        public UserResponse User { get; set; }
     }
 }

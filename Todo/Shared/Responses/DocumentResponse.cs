@@ -1,4 +1,6 @@
-﻿namespace Todo.Shared.Responses
+﻿using Todo.Core.Models;
+
+namespace Todo.Shared.Responses
 {
     public record DocumentResponse
     {
@@ -18,5 +20,6 @@
         /// Document notes
         /// </summary>
         public required List<NoteResponse> Notes { get; set; }
+        public required UserResponse User { get; set; }
     }
 }

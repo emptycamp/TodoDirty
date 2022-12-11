@@ -24,5 +24,7 @@
         /// Audio recordings that belong to the note
         /// </summary>
         public required List<AudioResponse> Audios { get; set; }
+
+        public required UserResponse User { get; set; }
     }
 }

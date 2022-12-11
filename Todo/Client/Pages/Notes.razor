@@ -1,0 +1,289 @@
+﻿@page "/notes/{id?}"
+@attribute [Authorize]
+@using Microsoft.AspNetCore.Components
+@using Todo.Shared.Responses
+@using Microsoft.AspNetCore.Authorization
+@using Todo.Shared.Requests
+@using Todo.Shared.Responses.Errors
+@inject HttpClient HttpClient
+@inject ISnackbar Snackbar
+@inject IDialogService DialogService
+@inject NavigationManager NavigationManager
+@using FluentValidation
+@using Severity = MudBlazor.Severity
+
+@if (_elements is null or { Count: 0 })
+{
+    <MudText>No notes were found</MudText>
+}
+else
+{
+    <MudTable Items="@_elements"
+          Dense="false"
+          Hover="true"
+          ReadOnly="false"
+          CanCancelEdit="true"
+          Filter="new Func<NoteResponse,bool>(TableFilter)"
+          @bind-SelectedItem="_selectedItem"
+          SortLabel="Sort By"
+          CommitEditTooltip="Commit Edit"
+          RowEditPreview="BackupItem"
+          RowEditCancel="ResetItemToOriginalValues"
+          RowEditCommit="UpdateItem"
+          OnPreviewEditClick="() => _isEditing = !_isEditing"
+          OnCancelEditClick="() => _isEditing = !_isEditing"
+          OnRowClick="RowClick"
+          T="NoteResponse"
+          IsEditRowSwitchingBlocked="false"
+          ApplyButtonPosition="@TableApplyButtonPosition.End"
+          EditButtonPosition="TableEditButtonPosition.End"
+          EditTrigger="TableEditTrigger.EditButton"
+          Class="zoom">
+        <ToolBarContent>
+            <MudText Typo="Typo.h6">Notes</MudText>
+            <MudSpacer />
+            <MudTextField @bind-Value="_searchString" Placeholder="Search" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+        </ToolBarContent>
+        <ColGroup>
+            <col />
+            <col />
+            <col />
+            <col />
+        </ColGroup>
+        <HeaderContent>
+            <MudTh><MudTableSortLabel SortBy="new Func<NoteResponse, object>(x=>x.Id)">Id</MudTableSortLabel></MudTh>
+            <MudTh><MudTableSortLabel SortBy="new Func<NoteResponse, object>(x=>x.Title)">Title</MudTableSortLabel></MudTh>
+            <MudTh><MudTableSortLabel SortBy="new Func<NoteResponse, object>(x=>x.User.UserName)">Created by</MudTableSortLabel></MudTh>
+            <MudTh />
+        </HeaderContent>
+        <RowTemplate>
+            <MudTd DataLabel="Id">@context.Id</MudTd>
+            <MudTd DataLabel="Title">@context.Title</MudTd>
+            <MudTd DataLabel="Created by">@context.User.UserName</MudTd>
+            <MudTd>
+                <MudIconButton @onclick="() => DeleteItem(context.Id)" Icon="@Icons.Material.Filled.Delete" Class="pa-0 ml-4" aria-label="delete" />
+            </MudTd>
+        </RowTemplate>
+        <RowEditingTemplate>
+            <MudTd DataLabel="Id">@context.Id</MudTd>
+            <MudTd DataLabel="Title">
+                <MudTextField @bind-Value="@context.Title" Required />
+            </MudTd>
+            <MudTd DataLabel="Created by">@context.User.UserName</MudTd>
+            <MudTd>
+                <MudIconButton @onclick="() => DeleteItem(context.Id)" Icon="@Icons.Material.Filled.Delete" Class="pa-0 ml-4" aria-label="delete" />
+            </MudTd>
+        </RowEditingTemplate>
+        <PagerContent>
+            <MudTablePager />
+        </PagerContent>
+        <EditButtonContent Context="button">
+            <MudIconButton Size="@Size.Small" Icon="@Icons.Outlined.Edit" Class="pa-0" OnClick="@button.ButtonAction" Disabled="@button.ButtonDisabled" />
+        </EditButtonContent>
+    </MudTable>
+}
+
+@if (int.TryParse(Id, out int _))
+{
+    <MudCard class="mt-5">
+        <Text class="mt-5">Create Note</Text>
+        <MudForm Model="@_newNote" @ref="@_form" Validation="@(createNoteValidator.ValidateValue)" ValidationDelay="0">
+            <MudCardContent>
+                <MudTextField @bind-Value="_newNote.Title"
+                              For="@(() => _newNote.Title)"
+                              Immediate="true"
+                              Label="Title"/>
+                <MudTextField @bind-Value="_newNote.Text"
+                              For="@(() => _newNote.Text)"
+                              Immediate="true"
+                              Label="Text"/>
+            </MudCardContent>
+        </MudForm>
+        <MudCardActions>
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" Class="ml-auto" OnClick="@(async () => await CreateNewNote())">Create</MudButton>
+        </MudCardActions>
+    </MudCard>
+}
+
+@code {
+    [Parameter]
+    public string? Id { get; set; }
+
+    private string _searchString = "";
+    private bool _isEditing = false;
+    private NoteResponse? _selectedItem;
+    private NoteResponse? _noteBackup;
+    private CreateNoteRequest _newNote = new() { Title = "", DocumentId = 0 };
+    private List<NoteResponse>? _elements = new();
+
+    private MudForm _form = new();
+    CreateNoteValidator createNoteValidator = new();
+
+    public class CreateNoteValidator : AbstractValidator<CreateNoteRequest>
+    {
+        public CreateNoteValidator()
+        {
+            RuleFor(x => x.Title)
+                .NotEmpty()
+                .Length(5, 100);
+        }
+
+        public Func<object, string, Task<IEnumerable<string>>> ValidateValue => async (model, propertyName) =>
+        {
+            var result = await ValidateAsync(ValidationContext<CreateNoteRequest>.CreateWithOptions((CreateNoteRequest)model, x => x.IncludeProperties(propertyName)));
+            if (result.IsValid)
+                return Array.Empty<string>();
+            return result.Errors.Select(e => e.ErrorMessage);
+        };
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (Id != null && int.TryParse(Id, out int id))
+        {
+            var result = await HttpClient.GetFromJsonAsync<DocumentResponse>($"api/v1/Document/{id}/notes");
+            if (result != null)
+            {
+                _elements = result.Notes;
+            }
+        }
+        else
+        {
+            _elements = await HttpClient.GetFromJsonAsync<List<NoteResponse>>("api/v1/Note") ?? new List<NoteResponse>();
+        }
+        StateHasChanged();
+    }
+
+    private void BackupItem(object element)
+    {
+        _noteBackup = (NoteResponse)element with { };
+    }
+
+    private void RowClick(TableRowClickEventArgs<NoteResponse> eventArgs)
+    {
+        if (_isEditing == false)
+        {
+            NavigationManager.NavigateTo($"/audios/{Id}/{eventArgs.Item.Id}");
+        } 
+    }
+
+    private async void UpdateItem(object item)
+    {
+        _isEditing = false;
+
+        var note = (NoteResponse)item;
+
+        var updateNote = new CreateNoteRequest
+        {
+            DocumentId = int.Parse(Id!),
+            Text = note.Text,
+            Title = note.Title
+        };
+
+        if (note != _noteBackup)
+        {
+            var response = await HttpClient.PutAsJsonAsync($"api/v1/Note/{note.Id}", updateNote);
+            if (response.IsSuccessStatusCode)
+            {
+                Snackbar.Add($"Note with id: {note.Id} was updated!", Severity.Success);
+            }
+            else
+            {
+                ResetItemToOriginalValues(note);
+                StateHasChanged();
+
+                var error = await response.Content.ReadFromJsonAsync<ErrorResponse>();
+                if (error == null)
+                {
+                    Snackbar.Add("Something went wrong", Severity.Error);
+                }
+                else
+                {
+                    Snackbar.Add(error.FirstErrorMessage, Severity.Error);
+                }
+            }
+        }
+    }
+
+    private async void DeleteItem(int id)
+    {
+        var parameters = new DialogParameters
+        {
+            { "ContentText", $"Do you really want to delete note with id: {id}?" },
+            { "ButtonText", "Delete" },
+            { "Color", Color.Error }
+        };
+
+        var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.ExtraSmall };
+
+        var result = await DialogService.Show<Dialog>("Delete", parameters, options).Result;
+        if (!result.Cancelled)
+        {
+            var response = await HttpClient.DeleteAsync($"api/v1/Note/{id}");
+            if (response.IsSuccessStatusCode)
+            {
+                Snackbar.Add($"Note with id: {id} was deleted!", Severity.Success);
+                await OnInitializedAsync();
+                StateHasChanged();
+            }
+            else
+            {
+                try
+                {
+                    ErrorResponse? error = await response.Content.ReadFromJsonAsync<ErrorResponse>();
+                    Snackbar.Add(error.FirstErrorMessage, Severity.Error);
+                }
+                catch (Exception)
+                {
+                    Snackbar.Add("Something went wrong", Severity.Error);
+                }
+            }
+        }
+    }
+
+    private async Task CreateNewNote()
+    {
+        _isEditing = false;
+
+        await _form.Validate();
+
+        if (_form.IsValid)
+        {
+            _newNote.DocumentId = int.Parse(Id!);
+            var response = await HttpClient.PostAsJsonAsync("api/v1/Note", _newNote);
+
+            if (response.IsSuccessStatusCode)
+            {
+                _newNote.Title = "";
+                _newNote.Text = "";
+                Snackbar.Add("Note was created!", Severity.Success);
+                await OnInitializedAsync();
+                StateHasChanged();
+            }
+            else
+            {
+                try
+                {
+                    ErrorResponse? error = await response.Content.ReadFromJsonAsync<ErrorResponse>();
+                    Snackbar.Add(error.FirstErrorMessage, Severity.Error);
+                }
+                catch (Exception)
+                {
+                    Snackbar.Add("Something went wrong", Severity.Error);
+                }
+            }
+        }
+    }
+
+    private void ResetItemToOriginalValues(object note)
+    {
+        ((NoteResponse)note).Title = _noteBackup!.Title;
+    }
+
+    private bool TableFilter(NoteResponse element) => FilterByTitle(element, _searchString);
+
+    private static bool FilterByTitle(NoteResponse element, string searchString)
+    {
+        return string.IsNullOrWhiteSpace(searchString) || element.Title.Contains(searchString, StringComparison.OrdinalIgnoreCase);
+    }
+}

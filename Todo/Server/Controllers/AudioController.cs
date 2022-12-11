@@ -41,7 +41,17 @@ public class AudioController : ApiControllerBase
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> CreateAudio(CreateAudioRequest audio)
     {
-        var createdDocument = await _audioService.CreateEntity(audio, UserId);
+        AudioResponse createdDocument;
+
+        if (IsAdmin)
+        {
+            createdDocument = await _audioService.CreateImpersonatedEntity(audio);
+        }
+        else
+        {
+            createdDocument = await _audioService.CreateEntity(audio, UserId);
+        }
+
         return CreatedAtAction("GetAudio", new { id = createdDocument.Id }, createdDocument);
     }
 

@@ -4,7 +4,7 @@ using Todo.Core.Models;
 
 namespace Todo.Infrastructure
 {
-    public class NoteRepository: RepositoryBase<Note>, INoteRepository
+    public class NoteRepository: RepositoryBaseWithUser<Note>, INoteRepository
     {
         public NoteRepository(ApplicationDbContext context) : base(context)
         {
@@ -21,7 +21,7 @@ namespace Todo.Infrastructure
 
         public override async Task<ICollection<Note>> GetAll(int limit = 1000, int offset = 0)
         {
-            return await Table.Skip(offset).Take(limit).Include(x => x.Audios).ToListAsync();
+            return await Table.Skip(offset).Take(limit).Include(x => x.User).Include(x => x.Audios).ToListAsync();
         }
     }
 }

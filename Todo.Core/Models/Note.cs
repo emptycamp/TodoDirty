@@ -2,7 +2,7 @@
 
 namespace Todo.Core.Models
 {
-    public class Note: EntityBase
+    public class Note: EntityWithUser
     {
         public required string Title { get; set; }
         public string? Text { get; set; }
@@ -10,6 +10,6 @@ namespace Todo.Core.Models
         
         [ForeignKey(nameof(User))]
         public required Guid UserId { get; set; }
-        public required User User { get; set; }
+        public Document Document { get; set; }
     }
 }

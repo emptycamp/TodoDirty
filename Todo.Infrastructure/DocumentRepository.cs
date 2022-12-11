@@ -22,7 +22,7 @@ namespace Todo.Infrastructure
 
         public async Task<Document> GetDocumentWithNotesOrThrow(int documentId, int limit = 1000, int offset = 0)
         {
-            return await Table
+            return await Table.Include(x => x.User)
                 .Include(x => x.Notes.Skip(offset).Take(limit))
                 .FirstOrDefaultAsync(x => x.Id == documentId)
                    ?? throw new NotFoundException(nameof(Document));
@@ -30,7 +30,7 @@ namespace Todo.Infrastructure
 
         public async Task<Document> GetDocumentWithNoteWithAudiosOrThrow(int documentId, int noteId, int limit = 1000, int offset = 0)
         {
-            var result = await Table
+            var result = await Table.Include(x => x.User)
                        .Include(x => x.Notes)
                        .ThenInclude(x => x.Audios.Skip(offset).Take(limit))
                        .FirstOrDefaultAsync(doc => doc.Id == documentId)
@@ -85,6 +85,11 @@ namespace Todo.Infrastructure
             document.Notes = new List<Note> { result.Note };
 
             return document;
+        }
+
+        public override async Task<ICollection<Document>> GetAll(int limit = 1000, int offset = 0)
+        {
+            return await Table.AsNoTracking().Skip(offset).Take(limit).Include(x => x.User).ToListAsync();
         }
     }
 }

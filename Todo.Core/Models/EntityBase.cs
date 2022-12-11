@@ -1,5 +1,10 @@
 ﻿namespace Todo.Core.Models
 {
+    public class EntityWithUser : EntityBase<int>
+    {
+        public required User User { get; set; }
+    }
+
     public class EntityBase : EntityBase<int>
     {
     }

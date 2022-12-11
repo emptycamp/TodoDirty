@@ -1,0 +1,271 @@
+﻿@page "/documents/{id?}"
+@attribute [Authorize]
+@using Microsoft.AspNetCore.Components
+@using Todo.Shared.Responses
+@using Microsoft.AspNetCore.Authorization
+@using Todo.Shared.Requests
+@using Todo.Shared.Responses.Errors
+@inject HttpClient HttpClient
+@inject ISnackbar Snackbar
+@inject IDialogService DialogService
+@inject NavigationManager NavigationManager
+@using FluentValidation
+@using Microsoft.AspNetCore.Identity
+@using Todo.Core.Models
+@using Severity = MudBlazor.Severity
+
+@if (_elements is null or { Count: 0 })
+{
+    <MudText>No documents were found</MudText>
+}
+else
+{
+    <MudTable Items="@_elements"
+          Dense="false"
+          Hover="true"
+          ReadOnly="false"
+          CanCancelEdit="true"
+          Filter="new Func<DocumentResponse,bool>(TableFilter)"
+          @bind-SelectedItem="_selectedItem"
+          SortLabel="Sort By"
+          CommitEditTooltip="Commit Edit"
+          RowEditPreview="BackupItem"
+          RowEditCancel="ResetItemToOriginalValues"
+          RowEditCommit="UpdateItem"
+          OnPreviewEditClick="() => _isEditing = !_isEditing"
+          OnCancelEditClick="() => _isEditing = !_isEditing"
+          OnRowClick="RowClick"
+          T="DocumentResponse"
+          IsEditRowSwitchingBlocked="false"
+          ApplyButtonPosition="@TableApplyButtonPosition.End"
+          EditButtonPosition="TableEditButtonPosition.End"
+          EditTrigger="TableEditTrigger.EditButton"
+          Class="zoom">
+        <ToolBarContent>
+            <MudText Typo="Typo.h6">Documents</MudText>
+            <MudSpacer />
+            <MudTextField @bind-Value="_searchString" Placeholder="Search" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+        </ToolBarContent>
+        <ColGroup>
+            <col />
+            <col />
+            <col />
+            <col />
+        </ColGroup>
+        <HeaderContent>
+            <MudTh><MudTableSortLabel SortBy="new Func<DocumentResponse, object>(x=>x.Id)">Id</MudTableSortLabel></MudTh>
+            <MudTh><MudTableSortLabel SortBy="new Func<DocumentResponse, object>(x=>x.Title)">Title</MudTableSortLabel></MudTh>
+            <MudTh><MudTableSortLabel SortBy="new Func<DocumentResponse, object>(x=>x.User.UserName)">Created by</MudTableSortLabel></MudTh>
+            <MudTh />
+        </HeaderContent>
+        <RowTemplate>
+            <MudTd DataLabel="Id">@context.Id</MudTd>
+            <MudTd DataLabel="Title">@context.Title</MudTd>
+            <MudTd DataLabel="Created by">@context.User.UserName</MudTd>
+            <MudTd>
+                <MudIconButton @onclick="() => DeleteItem(context.Id)" Icon="@Icons.Material.Filled.Delete" Class="pa-0 ml-4" aria-label="delete" />
+            </MudTd>
+        </RowTemplate>
+        <RowEditingTemplate>
+            <MudTd DataLabel="Id">@context.Id</MudTd>
+            <MudTd DataLabel="Title">
+                <MudTextField @bind-Value="@context.Title" Required />
+            </MudTd>
+            <MudTd DataLabel="Created by">@context.User.UserName</MudTd>
+            <MudTd>
+                <MudIconButton @onclick="() => DeleteItem(context.Id)" Icon="@Icons.Material.Filled.Delete" Class="pa-0 ml-4" aria-label="delete" />
+            </MudTd>
+        </RowEditingTemplate>
+        <PagerContent>
+            <MudTablePager />
+        </PagerContent>
+        <EditButtonContent Context="button">
+            <MudIconButton Size="@Size.Small" Icon="@Icons.Outlined.Edit" Class="pa-0" OnClick="@button.ButtonAction" Disabled="@button.ButtonDisabled" />
+        </EditButtonContent>
+    </MudTable>
+}
+
+<MudCard class="mt-5">
+    <Text class="mt-5">Create Document</Text>
+    <MudForm Model="@_newDocument" @ref="@_form" Validation="@(createDocumentValidator.ValidateValue)" ValidationDelay="0">
+        <MudCardContent>
+            <MudTextField @bind-Value="_newDocument.Title"
+                          For="@(() => _newDocument.Title)"
+                          Immediate="true"
+                          Label="Title"/>
+        </MudCardContent>
+    </MudForm>
+    <MudCardActions>
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" Class="ml-auto" OnClick="@(async () => await CreateNewDocument())">Create</MudButton>
+    </MudCardActions>
+</MudCard>
+
+@code {
+    [Parameter]
+    public string? Id { get; set; }
+
+    private string _searchString = "";
+    private bool _isEditing = false;
+    private DocumentResponse? _selectedItem;
+    private DocumentResponse? _documentBackup;
+    private CreateDocumentRequest _newDocument = new() { Title = "" };
+    private List<DocumentResponse>? _elements = new();
+
+    private MudForm _form = new();
+    CreateDocumentValidator createDocumentValidator = new();
+
+    public class CreateDocumentValidator : AbstractValidator<CreateDocumentRequest>
+    {
+        public CreateDocumentValidator()
+        {
+            RuleFor(x => x.Title)
+                .NotEmpty()
+                .Length(5, 100);
+        }
+
+        public Func<object, string, Task<IEnumerable<string>>> ValidateValue => async (model, propertyName) =>
+        {
+            var result = await ValidateAsync(ValidationContext<CreateDocumentRequest>.CreateWithOptions((CreateDocumentRequest)model, x => x.IncludeProperties(propertyName)));
+            if (result.IsValid)
+                return Array.Empty<string>();
+            return result.Errors.Select(e => e.ErrorMessage);
+        };
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (Id != null && int.TryParse(Id, out int id))
+        {
+            var result = await HttpClient.GetFromJsonAsync<DocumentResponse>($"api/v1/Document/{id}");
+            if (result != null)
+            {
+                _elements = new List<DocumentResponse> { result };
+            }
+        }
+        else
+        {
+            _elements = await HttpClient.GetFromJsonAsync<List<DocumentResponse>>("api/v1/Document") ?? new List<DocumentResponse>();
+        }
+        StateHasChanged();
+    }
+
+    private void BackupItem(object element)
+    {
+        _documentBackup = (DocumentResponse)element with { };
+    }
+
+    private void RowClick(TableRowClickEventArgs<DocumentResponse> eventArgs)
+    {
+        if (_isEditing == false)
+        {
+            NavigationManager.NavigateTo($"/notes/{eventArgs.Item.Id}");
+        } 
+    }
+
+    private async void UpdateItem(object item)
+    {
+        _isEditing = false;
+
+        var document = (DocumentResponse)item;
+
+        if (document != _documentBackup)
+        {
+            var response = await HttpClient.PutAsJsonAsync($"api/v1/Document/{document.Id}", document);
+            if (response.IsSuccessStatusCode)
+            {
+                Snackbar.Add($"Document with id: {document.Id} was updated!", Severity.Success);
+            }
+            else
+            {
+                ResetItemToOriginalValues(document);
+                StateHasChanged();
+
+                var error = await response.Content.ReadFromJsonAsync<ErrorResponse>();
+                if (error == null)
+                {
+                    Snackbar.Add("Something went wrong", Severity.Error);
+                }
+                else
+                {
+                    Snackbar.Add(error.FirstErrorMessage, Severity.Error);
+                }
+            }
+        }
+    }
+
+    private async void DeleteItem(int id)
+    {
+        var parameters = new DialogParameters
+        {
+            { "ContentText", $"Do you really want to delete document with id: {id}?" },
+            { "ButtonText", "Delete" },
+            { "Color", Color.Error }
+        };
+
+        var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.ExtraSmall };
+
+        var result = await DialogService.Show<Dialog>("Delete", parameters, options).Result;
+        if (!result.Cancelled)
+        {
+            var response = await HttpClient.DeleteAsync($"api/v1/Document/{id}");
+            if (response.IsSuccessStatusCode)
+            {
+                Snackbar.Add($"Document with id: {id} was deleted!", Severity.Success);
+                await OnInitializedAsync();
+            }
+            else
+            {
+                try
+                {
+                    ErrorResponse? error = await response.Content.ReadFromJsonAsync<ErrorResponse>();
+                    Snackbar.Add(error.FirstErrorMessage, Severity.Error);
+                }
+                catch (Exception)
+                {
+                    Snackbar.Add("Something went wrong", Severity.Error);
+                }
+            }
+        }
+    }
+
+    private async Task CreateNewDocument()
+    {
+        await _form.Validate();
+        _isEditing = false;
+        if (_form.IsValid)
+        {
+            var response = await HttpClient.PostAsJsonAsync("api/v1/Document", _newDocument);
+
+            if (response.IsSuccessStatusCode)
+            {
+                _newDocument.Title = "";
+                Snackbar.Add("Document was created!", Severity.Success);
+                await OnInitializedAsync();
+            }
+            else
+            {
+                try
+                {
+                    ErrorResponse? error = await response.Content.ReadFromJsonAsync<ErrorResponse>();
+                    Snackbar.Add(error.FirstErrorMessage, Severity.Error);
+                }
+                catch (Exception)
+                {
+                    Snackbar.Add("Something went wrong", Severity.Error);
+                }
+            }
+        }
+    }
+
+    private void ResetItemToOriginalValues(object document)
+    {
+        ((DocumentResponse)document).Title = _documentBackup!.Title;
+    }
+
+    private bool TableFilter(DocumentResponse element) => FilterByTitle(element, _searchString);
+
+    private static bool FilterByTitle(DocumentResponse element, string searchString)
+    {
+        return string.IsNullOrWhiteSpace(searchString) || element.Title.Contains(searchString, StringComparison.OrdinalIgnoreCase);
+    }
+}

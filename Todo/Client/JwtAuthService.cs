@@ -25,6 +25,11 @@ public class JwtAuthService
             RefreshToken = refreshToken
         };
     }
+    public async Task Logout()
+    {
+        await _localStorage.RemoveItemAsync("token");
+        await _localStorage.RemoveItemAsync("refresh");
+    }
 
     public async Task StoreTokenToLocalStorage(string token, string refresh)
     {

@@ -9,12 +9,12 @@
 @inject JwtAuthService JwtAuthService
 @inject HttpClient HttpClient
 @inject NavigationManager NavigationManager
+@inject ISnackbar Snackbar
 
 
 <EditForm Model="@_model" OnValidSubmit="OnValidSubmit">
-    <DataAnnotationsValidator />
     <MudGrid>
-        <MudItem xs="12" sm="7">
+        <MudItem xs="12" sm="8" Class="zoom">
             <MudCard>
                 <MudCardContent>
                     <MudTextField Label="Email" Class="mt-3"
@@ -26,17 +26,6 @@
                     <MudButton ButtonType="ButtonType.Button" @onclick="Authenticate" Variant="Variant.Filled" Color="Color.Primary" Class="ml-auto">Login</MudButton>
                 </MudCardActions>
             </MudCard>
-        </MudItem>
-        <MudItem xs="12" sm="5">
-            <MudPaper Class="pa-4 mud-height-full">
-                <MudText Typo="Typo.subtitle2">Validation Summary</MudText>
-                @if(!_success)
-                {
-                    <MudText Color="@Color.Error">
-                        <ValidationSummary />
-                    </MudText>
-                }
-            </MudPaper>
         </MudItem>
     </MudGrid>
 </EditForm>
@@ -64,7 +53,7 @@
 
         if (response.StatusCode == HttpStatusCode.Unauthorized)
         {
-            // TODO: show invalid details error
+            Snackbar.Add("Invalid password", Severity.Error);
         }
         else if (response.IsSuccessStatusCode)
         {

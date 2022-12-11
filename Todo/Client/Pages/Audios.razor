@@ -1,0 +1,275 @@
+﻿@page "/audios/{documentId?}/{noteId?}"
+@attribute [Authorize]
+@using Microsoft.AspNetCore.Components
+@using Todo.Shared.Responses
+@using Microsoft.AspNetCore.Authorization
+@using Todo.Shared.Requests
+@using Todo.Shared.Responses.Errors
+@inject HttpClient HttpClient
+@inject ISnackbar Snackbar
+@inject IDialogService DialogService
+@inject NavigationManager NavigationManager
+@using FluentValidation
+@using Severity = MudBlazor.Severity
+
+@if (_elements is null or { Count: 0 })
+{
+    <MudText>No audios were found</MudText>
+}
+else
+{
+    <MudTable Items="@_elements"
+          Dense="false"
+          Hover="true"
+          ReadOnly="false"
+          CanCancelEdit="true"
+          Filter="new Func<AudioResponse,bool>(TableFilter)"
+          @bind-SelectedItem="_selectedItem"
+          SortLabel="Sort By"
+          CommitEditTooltip="Commit Edit"
+          RowEditPreview="BackupItem"
+          RowEditCancel="ResetItemToOriginalValues"
+          RowEditCommit="UpdateItem"
+          OnPreviewEditClick="() => _isEditing = !_isEditing"
+          OnCancelEditClick="() => _isEditing = !_isEditing"
+          T="AudioResponse"
+          IsEditRowSwitchingBlocked="false"
+          ApplyButtonPosition="@TableApplyButtonPosition.End"
+          EditButtonPosition="TableEditButtonPosition.End"
+          EditTrigger="TableEditTrigger.EditButton"
+          Class="zoom">
+        <ToolBarContent>
+            <MudText Typo="Typo.h6">Audios</MudText>
+            <MudSpacer />
+            <MudTextField @bind-Value="_searchString" Placeholder="Search" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+        </ToolBarContent>
+        <ColGroup>
+            <col />
+            <col />
+            <col />
+        </ColGroup>
+        <HeaderContent>
+            <MudTh><MudTableSortLabel SortBy="new Func<AudioResponse, object>(x=>x.Id)">Id</MudTableSortLabel></MudTh>
+            <MudTh><MudTableSortLabel SortBy="new Func<AudioResponse, object>(x=>x.Path)">Path</MudTableSortLabel></MudTh>
+            <MudTh><MudTableSortLabel SortBy="new Func<AudioResponse, object>(x=>x.User.UserName)">Created by</MudTableSortLabel></MudTh>
+            <MudTh />
+        </HeaderContent>
+        <RowTemplate>
+            <MudTd DataLabel="Id">@context.Id</MudTd>
+            <MudTd DataLabel="Path">@context.Path</MudTd>
+            <MudTd DataLabel="Created by">@context.User.UserName</MudTd>
+            <MudTd>
+                <MudIconButton @onclick="() => DeleteItem(context.Id)" Icon="@Icons.Material.Filled.Delete" Class="pa-0 ml-4" aria-label="delete" />
+            </MudTd>
+        </RowTemplate>
+        <RowEditingTemplate>
+            <MudTd DataLabel="Id">@context.Id</MudTd>
+            <MudTd DataLabel="Path">
+                <MudTextField @bind-Value="@context.Path" Required />
+            </MudTd>
+            <MudTd DataLabel="Created by">@context.User.UserName</MudTd>
+            <MudTd>
+                <MudIconButton @onclick="() => DeleteItem(context.Id)" Icon="@Icons.Material.Filled.Delete" Class="pa-0 ml-4" aria-label="delete" />
+            </MudTd>
+        </RowEditingTemplate>
+        <PagerContent>
+            <MudTablePager />
+        </PagerContent>
+        <EditButtonContent Context="button">
+            <MudIconButton Size="@Size.Small" Icon="@Icons.Outlined.Edit" Class="pa-0" OnClick="@button.ButtonAction" Disabled="@button.ButtonDisabled" />
+        </EditButtonContent>
+    </MudTable>
+}
+
+@if (int.TryParse(DocumentId, out int _))
+{
+    <MudCard class="mt-5">
+        <Text class="mt-5">Create Audio</Text>
+        <MudForm Model="@_newAudio" @ref="@_form" Validation="@(createAudioValidator.ValidateValue)" ValidationDelay="0">
+            <MudCardContent>
+                <MudTextField @bind-Value="_newAudio.Path"
+                              For="@(() => _newAudio.Path)"
+                              Immediate="true"
+                              Label="Path"/>
+            </MudCardContent>
+        </MudForm>
+        <MudCardActions>
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" Class="ml-auto" OnClick="@(async () => await CreateNewAudio())">Create</MudButton>
+        </MudCardActions>
+    </MudCard>
+}
+
+@code {
+    [Parameter]
+    public string? DocumentId { get; set; }
+    [Parameter]
+    public string? NoteId { get; set; }
+
+    private string _searchString = "";
+    private bool _isEditing = false;
+    private AudioResponse? _selectedItem;
+    private AudioResponse? _audioBackup;
+    private CreateAudioRequest _newAudio = new() { NoteId = 0, Path = "" };
+    private List<AudioResponse>? _elements = new();
+
+    private MudForm _form = new();
+    CreateAudioValidator createAudioValidator = new();
+
+    public class CreateAudioValidator : AbstractValidator<CreateAudioRequest>
+    {
+        public CreateAudioValidator()
+        {
+            RuleFor(x => x.Path)
+                .NotEmpty()
+                .Length(5, 100);
+        }
+
+        public Func<object, string, Task<IEnumerable<string>>> ValidateValue => async (model, propertyName) =>
+        {
+            var result = await ValidateAsync(ValidationContext<CreateAudioRequest>.CreateWithOptions((CreateAudioRequest)model, x => x.IncludeProperties(propertyName)));
+            if (result.IsValid)
+                return Array.Empty<string>();
+            return result.Errors.Select(e => e.ErrorMessage);
+        };
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (DocumentId != null && int.TryParse(DocumentId, out int documentId) && int.TryParse(NoteId, out int noteId))
+        {
+            var result = await HttpClient.GetFromJsonAsync<DocumentResponse>($"api/v1/Document/{documentId}/notes/{noteId}/audios");
+            if (result != null)
+            {
+                _elements = result.Notes.First().Audios;
+            }
+        }
+        else
+        {
+            _elements = await HttpClient.GetFromJsonAsync<List<AudioResponse>>("api/v1/Audio") ?? new List<AudioResponse>();
+        }
+        StateHasChanged();
+    }
+
+    private void BackupItem(object element)
+    {
+        _audioBackup = (AudioResponse)element with { };
+    }
+
+    private async void UpdateItem(object item)
+    {
+        _isEditing = false;
+
+        var audio = (AudioResponse)item;
+
+        var updateAudio = new CreateAudioRequest
+        {
+            NoteId = int.Parse(NoteId!),
+            Path = audio.Path
+        };
+
+        if (audio != _audioBackup)
+        {
+            var response = await HttpClient.PutAsJsonAsync($"api/v1/Audio/{audio.Id}", updateAudio);
+            if (response.IsSuccessStatusCode)
+            {
+                Snackbar.Add($"Audio with id: {audio.Id} was updated!", Severity.Success);
+            }
+            else
+            {
+                ResetItemToOriginalValues(audio);
+                StateHasChanged();
+
+                var error = await response.Content.ReadFromJsonAsync<ErrorResponse>();
+                if (error == null)
+                {
+                    Snackbar.Add("Something went wrong", Severity.Error);
+                }
+                else
+                {
+                    Snackbar.Add(error.FirstErrorMessage, Severity.Error);
+                }
+            }
+        }
+    }
+
+    private async void DeleteItem(int id)
+    {
+        var parameters = new DialogParameters
+        {
+            { "ContentText", $"Do you really want to delete audio with id: {id}?" },
+            { "ButtonText", "Delete" },
+            { "Color", Color.Error }
+        };
+
+        var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.ExtraSmall };
+
+        var result = await DialogService.Show<Dialog>("Delete", parameters, options).Result;
+        if (!result.Cancelled)
+        {
+            var response = await HttpClient.DeleteAsync($"api/v1/Audio/{id}");
+            if (response.IsSuccessStatusCode)
+            {
+                Snackbar.Add($"Audio with id: {id} was deleted!", Severity.Success);
+                await OnInitializedAsync();
+                StateHasChanged();
+            }
+            else
+            {
+                try
+                {
+                    ErrorResponse? error = await response.Content.ReadFromJsonAsync<ErrorResponse>();
+                    Snackbar.Add(error.FirstErrorMessage, Severity.Error);
+                }
+                catch (Exception)
+                {
+                    Snackbar.Add("Something went wrong", Severity.Error);
+                }
+            }
+        }
+    }
+
+    private async Task CreateNewAudio()
+    {
+        _isEditing = false;
+
+        await _form.Validate();
+
+        if (_form.IsValid)
+        {
+            _newAudio.NoteId = int.Parse(NoteId!);
+            var response = await HttpClient.PostAsJsonAsync("api/v1/Audio", _newAudio);
+
+            if (response.IsSuccessStatusCode)
+            {
+                _newAudio.Path = "";
+                Snackbar.Add("Audio was created!", Severity.Success);
+                await OnInitializedAsync();
+                StateHasChanged();
+            }
+            else
+            {
+                try
+                {
+                    ErrorResponse? error = await response.Content.ReadFromJsonAsync<ErrorResponse>();
+                    Snackbar.Add(error.FirstErrorMessage, Severity.Error);
+                }
+                catch (Exception)
+                {
+                    Snackbar.Add("Something went wrong", Severity.Error);
+                }
+            }
+        }
+    }
+
+    private void ResetItemToOriginalValues(object audio)
+    {
+        ((AudioResponse)audio).Path = _audioBackup!.Path;
+    }
+
+    private bool TableFilter(AudioResponse element) => FilterByPath(element, _searchString);
+
+    private static bool FilterByPath(AudioResponse element, string searchString)
+    {
+        return string.IsNullOrWhiteSpace(searchString) || element.Path.Contains(searchString, StringComparison.OrdinalIgnoreCase);
+    }
+}

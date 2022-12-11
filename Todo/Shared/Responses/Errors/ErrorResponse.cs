@@ -13,4 +13,5 @@ public class ErrorResponse
         Reason = reason;
         Errors = errors;
     }
+    public string FirstErrorMessage => Errors?.FirstOrDefault()?.Messages.FirstOrDefault() ?? Reason;
 }

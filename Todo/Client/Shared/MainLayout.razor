@@ -1,13 +1,20 @@
 ﻿@inherits LayoutComponentBase
+@inject JwtAuthService AuthService
+@inject AuthenticationStateProvider AuthStateProvider
 
 <div class="page">
     <div class="sidebar">
         <NavMenu />
     </div>
 
-    <main style="overflow: hidden">
+    <main>
+
         <div class="top-row px-4">
-            <a href="https://docs.microsoft.com/aspnet/" target="_blank">About</a>
+            <AuthorizeView>
+                <Authorized>
+                    <a @onclick="async () => { await AuthService.Logout(); await AuthStateProvider.GetAuthenticationStateAsync();}" target="_blank">Logout</a>
+                </Authorized>
+            </AuthorizeView>
         </div>
 
         <article class="content px-4" style="height: calc(100vh - 96px)">

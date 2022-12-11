@@ -74,6 +74,8 @@ namespace Todo.Services
                 throw new UnauthorizedException("Audio does not belong to current user");
             }
 
+            audio.UserId = audioEntity.UserId;
+
             var updatedAudio = await _audioRepository.Update(audio);
             var updatedAudioDto = _mapper.Map<AudioResponse>(updatedAudio);
             return updatedAudioDto;

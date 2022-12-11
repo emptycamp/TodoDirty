@@ -27,6 +27,8 @@ namespace Todo.Services.Mappers
             CreateMap<ValidationException, ValidationErrorResponse>();
 
             CreateMap<RefreshTokenRequest, AccessTokenResponse>();
+
+            CreateMap<User, UserResponse>();
         }
     }
 }

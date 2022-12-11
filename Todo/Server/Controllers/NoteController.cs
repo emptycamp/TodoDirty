@@ -40,7 +40,17 @@ public class NoteController : ApiControllerBase
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> CreateNote(CreateNoteRequest note)
     {
-        var createdDocument = await _noteService.CreateEntity(note, UserId);
+        NoteResponse createdDocument;
+
+        if (IsAdmin)
+        {
+            createdDocument = await _noteService.CreateImpersonatedEntity(note);
+        }
+        else
+        {
+            createdDocument = await _noteService.CreateEntity(note, UserId);
+        }
+
         return CreatedAtAction("GetNote", new { id = createdDocument.Id }, createdDocument);
     }
 
