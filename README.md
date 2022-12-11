@@ -4,6 +4,12 @@
 # Database layer
 ![Database layer img](https://user-images.githubusercontent.com/18266973/194783520-4926239b-bcf1-4e20-ad25-034e1118534b.png)
 
+# Web wiremock
+![Wiremick PC](https://user-images.githubusercontent.com/18266973/206935636-48490a52-dba2-4b34-b4ae-773095273ce7.png)
+
+# Mobile wiremock
+![image](https://user-images.githubusercontent.com/18266973/206935696-068e9fc4-927e-4ceb-b5f3-39e1d98e438a.png)
+
 # Document API endpoints
 ![GET document](https://user-images.githubusercontent.com/18266973/194783023-45310253-2162-4267-a039-54b5be8b1d13.png)
 ![POST document img](https://user-images.githubusercontent.com/18266973/194783040-21fe97e7-a7f8-4744-a3e2-bcae954e66e1.png)
